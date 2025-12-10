@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 
 const items = [
   { href: '#beneficios', label: 'Beneficios' },
@@ -10,6 +11,9 @@ const items = [
   { href: '#resultados', label: 'Resultados' },
   { href: '#faq', label: 'FAQ' },
 ];
+
+// En Next.js, los archivos dentro de /public se referencian con ruta absoluta:
+const LOGO_MARK = '/primarylogo.png';
 
 export default function Navbar() {
   const [open, setOpen] = useState(false);
@@ -23,17 +27,26 @@ export default function Navbar() {
   return (
     <header className="sticky top-0 z-50 border-b bg-white/70 backdrop-blur supports-[backdrop-filter]:bg-white/60">
       <nav className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-4 py-3">
-        {/* Logo */}
-        <Link href="/" className="flex items-center gap-2 font-semibold">
-          <span className="inline-block h-7 w-7 rounded-full bg-black text-white grid place-items-center text-xs">D</span>
-          <span>Dots</span>
+        {/* Logo Dots */}
+        <Link href="/" className="flex items-center gap-2" aria-label="Ir al inicio">
+          <Image
+            src={LOGO_MARK}
+            alt="Dots"
+            width={112}    // ajusta si tu logo necesita otro tamaño
+            height={28}
+            className="h-7 w-auto"
+            priority
+          />
         </Link>
 
         {/* Desktop */}
         <ul className="hidden md:flex items-center gap-6 text-sm">
-          {items.map(i => (
+          {items.map((i) => (
             <li key={i.href}>
-              <button onClick={() => scrollTo(i.href)} className="opacity-80 hover:opacity-100">
+              <button
+                onClick={() => scrollTo(i.href)}
+                className="opacity-80 hover:opacity-100"
+              >
                 {i.label}
               </button>
             </li>
@@ -41,18 +54,20 @@ export default function Navbar() {
           <li>
             <button
               onClick={() => scrollTo('#comprar')}
-              className="rounded-xl bg-black px-4 py-2 text-white hover:opacity-90"
+              className="rounded-xl bg-[var(--dots-blue,_#4EACD8)] px-4 py-2 text-white hover:opacity-90"
             >
               Comprar
             </button>
           </li>
         </ul>
 
-        {/* Mobile */}
+        {/* Mobile toggle */}
         <button
           className="md:hidden rounded-lg border px-3 py-2"
-          onClick={() => setOpen(v => !v)}
+          onClick={() => setOpen((v) => !v)}
           aria-label="Abrir menú"
+          aria-expanded={open}
+          aria-controls="mobile-menu"
         >
           ☰
         </button>
@@ -60,9 +75,12 @@ export default function Navbar() {
 
       {/* Mobile sheet */}
       {open && (
-        <div className="md:hidden border-t bg-white/90 backdrop-blur">
+        <div
+          id="mobile-menu"
+          className="md:hidden border-t bg-white/90 backdrop-blur"
+        >
           <ul className="mx-auto max-w-6xl px-4 py-3 space-y-3">
-            {items.map(i => (
+            {items.map((i) => (
               <li key={i.href}>
                 <button
                   onClick={() => scrollTo(i.href)}
@@ -75,7 +93,7 @@ export default function Navbar() {
             <li>
               <button
                 onClick={() => scrollTo('#comprar')}
-                className="w-full rounded-xl bg-black px-4 py-2 text-white"
+                className="w-full rounded-xl bg-[var(--dots-blue,_#4EACD8)] px-4 py-2 text-white"
               >
                 Comprar
               </button>
