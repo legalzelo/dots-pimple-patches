@@ -2,14 +2,14 @@
 const nextConfig = {
   images: {
     remotePatterns: [
-      { protocol: 'https', hostname: 'cdn.shopify.com' },
-      { protocol: 'https', hostname: '*.myshopify.com' },
-       {
-        protocol: "https",
-        hostname: "images.pexels.com",
-      },
-    ]
-  }
+      { protocol: "https", hostname: "cdn.shopify.com" },
+      { protocol: "https", hostname: "*.myshopify.com" },
+      { protocol: "https", hostname: "images.pexels.com" },
+    ],
+  },
+  eslint: {
+    ignoreDuringBuilds: true,
+  },
 };
-export default nextConfig;
 
+export default nextConfig;

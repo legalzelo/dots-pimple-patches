@@ -18,7 +18,8 @@ const buyers: string[] = [
   "https://images.pexels.com/photos/2505336/pexels-photo-2505336.jpeg?cs=srgb&dl=pexels-bruthethe-2505336.jpg&fm=jpg",
 ];
 
-export const revalidate = 60;
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
 
 export default async function Home() {
   const handle = process.env.SINGLE_PRODUCT_HANDLE!;
