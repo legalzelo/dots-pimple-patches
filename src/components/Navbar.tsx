@@ -8,11 +8,10 @@ const items = [
   { href: '#beneficios', label: 'Beneficios' },
   { href: '#como-funciona', label: 'Cómo funciona' },
   { href: '#ingredientes', label: 'Ingredientes' },
-  { href: '#resultados', label: 'Resultados' },
+  { href: '#antes-despues', label: 'Antes / Después' },
   { href: '#faq', label: 'FAQ' },
 ];
 
-// En Next.js, los archivos dentro de /public se referencian con ruta absoluta:
 const LOGO_MARK = '/primarylogo.png';
 
 export default function Navbar() {
@@ -29,14 +28,18 @@ export default function Navbar() {
       <nav className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-4 py-3">
         {/* Logo Dots */}
         <Link href="/" className="flex items-center gap-2" aria-label="Ir al inicio">
-          <Image
-            src={LOGO_MARK}
-            alt="Dots"
-            width={112}    // ajusta si tu logo necesita otro tamaño
-            height={28}
-            className="h-7 w-auto"
-            priority
-          />
+          {/* Contenedor que define la altura real del header */}
+          <div className="h-8 md:h-10 overflow-hidden flex items-center">
+            <Image
+              src={LOGO_MARK}
+              alt="Dots"
+              width={220}
+              height={220}
+              // Imagen más grande de lo normal, el contenedor la recorta
+              className="h-12 md:h-14 w-auto"
+              priority
+            />
+          </div>
         </Link>
 
         {/* Desktop */}

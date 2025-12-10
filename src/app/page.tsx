@@ -2,7 +2,21 @@ import Image from 'next/image';
 import Section from '@/components/ui/Section';
 import { getSingleProduct } from '@/lib/shopify';
 import { buyNowAction } from './actions';
-import { HandHeart, ShieldCheck, Eye, Sparkles } from 'lucide-react';
+import {
+  HandHeart,
+  ShieldCheck,
+  Eye,
+  Sparkles,
+  CheckCircle2,
+  Info,
+} from 'lucide-react';
+
+const buyers: string[] = [
+  "https://images.pexels.com/photos/31578023/pexels-photo-31578023.jpeg?cs=srgb&dl=pexels-estudio37rd-31578023.jpg&fm=jpg",
+  "https://images.pexels.com/photos/1387432/pexels-photo-1387432.jpeg?cs=srgb&dl=pexels-mufasa-1387432.jpg&fm=jpg",
+  "https://images.pexels.com/photos/17277431/pexels-photo-17277431.jpeg?cs=srgb&dl=pexels-krivitskiy-17277431.jpg&fm=jpg",
+  "https://images.pexels.com/photos/2505336/pexels-photo-2505336.jpeg?cs=srgb&dl=pexels-bruthethe-2505336.jpg&fm=jpg",
+];
 
 export const revalidate = 60;
 
@@ -23,65 +37,131 @@ export default async function Home() {
   const heroImg =
     product.featuredImage?.url ?? product.images?.edges?.[0]?.node?.url ?? '';
 
-  // Retailers (edita a tus logos)
-  const retailers: { name: string; url?: string; logo?: string }[] = [
-    { name: 'Supermercado Ejemplo', url: '#', logo: '/retailers/super-ejemplo.png' },
-    { name: 'Farmacia Demo', url: '#', logo: '/retailers/farmacia-demo.png' },
-    { name: 'Tienda de Belleza XYZ', url: '#', logo: '/retailers/belleza-xyz.png' },
-  ];
+  // Ajusta esto a tu realidad
+  const productPriceLabel = 'RD$ 595';
+  const productPackLabel = '24 parches hidrocoloides';
+
+  // Retailers (edita a tus logos reales o usa “Muy pronto”)
+const retailers: { name: string; url?: string; logo?: string }[] = [
+  {
+    name: 'Jumbo',
+    url: 'https://www.jumbo.com.do', // si tienes la URL exacta del producto, ponla aquí
+    logo: '/jumbologo.webp',
+  },
+  {
+    name: 'Sienna Beauty Supply',
+    url: 'https://www.livesienna.com/shop/el-3245-parches-para-espinillas-dots-24und-172814?search=dots#attr=', // o la web que quieras
+    logo: '/SIENNA.png', // ajusta al nombre real del archivo en /public
+  },
+  {
+    name: 'Más puntos de venta pronto',
+    url: '#',
+    logo: '',
+  },
+];
 
   // Textos estilo “antes/después” usados como labels en testimonios
-  const beforeAfter: { caption: string }[] = [
+  const beforeAfterLabels: { caption: string }[] = [
     { caption: 'Noche con Dots' },
     { caption: '8 horas de uso' },
     { caption: 'Resultados reales' },
   ];
 
-  // Testimonios (videos verticales)
-  const testimonios: {
-    name: string;
-    country: string;
-    avatar?: string;
-    quote: string;
-    video: string;
-    poster?: string;
-  }[] = [
-    {
-      name: 'Leví Durante',
-      country: 'Guatemala',
-      avatar: '/testimonials/levi.jpg',
-      quote: '“Proceso simple y rápido. En una semana ya tenía todo listo.”',
-      video: '/testimonials/levi.mp4',
-      poster: '/testimonials/levi.jpg',
-    },
-    {
-      name: 'Paola Álvarez',
-      country: 'República Dominicana',
-      avatar: '/testimonials/paola.jpg',
-      quote: '“Atención impecable. Me ayudaron con Stripe y la cuenta bancaria.”',
-      video: '/testimonials/paola.mp4',
-      poster: '/testimonials/paola.jpg',
-    },
-    {
-      name: 'Gabriel Morales',
-      country: 'Nicaragua',
-      avatar: '/testimonials/gabriel.jpg',
-      quote: '“Superó mis expectativas. Recomendados 100%.”',
-      video: '/testimonials/gabriel.mp4',
-      poster: '/testimonials/gabriel.jpg',
-    },
-  ];
+  // Testimonios orientados a acné / piel
+const testimonios: {
+  name: string;
+  country: string;
+  avatar?: string;
+  quote: string;
+  video: string;
+  poster?: string;
+}[] = [
+  {
+    name: 'Ana G.',
+    country: 'Santo Domingo, RD',
+    avatar: '/testimonials/ana.jpg',
+    quote:
+      '“Tenía una espinilla antes de una reunión importante. Me puse un Dot de noche y al otro día amaneció mucho más plano.”',
+    video: '/testimonials/ana.mp4',
+    poster: '/testimonials/ana.jpg',
+  },
+  {
+    name: 'Mariel M.',
+    country: 'Santiago, RD',
+    avatar: '/testimonials/mariel.jpg',
+    quote:
+      '“Antes siempre me explotaba las espinillas. Ahora me pongo un Dot y no me lo toco, así no me quedan marcas.”',
+    video: '/testimonials/mariel.mp4',
+    poster: '/testimonials/mariel.jpg',
+  },
+  {
+    name: 'Sofía T.',
+    country: 'Santiago, RD',
+    avatar: '/testimonials/sofia.jpg',
+    quote:
+      '“Me gusta porque casi no se nota y puedo usarlo debajo del maquillaje cuando tengo algo puntual.”',
+    video: '/testimonials/sofia.mp4',
+    poster: '/testimonials/sofia.jpg',
+  },
+];
+
 
   // Chips “stickers” y avatars para social proof
   const chips = ['Invisible ✨', 'Barrera higiénica 🧴', 'Uso día/noche 🌙'];
-  const buyers = ['/users/u1.jpg', '/users/u2.jpg', '/users/u3.jpg', '/users/u4.jpg'];
 
   // Beneficios con íconos lucide
   const benefits = [
-    { icon: HandHeart, t: 'Aísla la zona', d: 'Evita fricción y contaminación.' },
-    { icon: ShieldCheck, t: 'Absorbe impurezas', d: 'Hidrocoloide que aplaca en horas.' },
-    { icon: Eye, t: 'Invisible y cómodo', d: 'Perfil delgado, bajo maquillaje.' },
+    { icon: HandHeart, t: 'Aísla la zona', d: 'Evita fricción, suciedad y que te la toques.' },
+    { icon: ShieldCheck, t: 'Absorbe impurezas', d: 'Hidrocoloide que ayuda a aplacar en horas.' },
+    { icon: Eye, t: 'Invisible y cómodo', d: 'Perfil delgado, incluso debajo del maquillaje.' },
   ] as const;
+
+  // Antes / Después (ajusta las rutas de imágenes a las reales)
+  const beforeAfterPhotos = [
+    {
+      id: 1,
+      label: 'Espinilla puntual',
+      beforeLabel: 'Antes de dormir',
+      afterLabel: 'Después de 8 h',
+      beforeImg: '/before-after/1-before.jpg',
+      afterImg: '/before-after/1-after.jpg',
+    },
+    {
+      id: 2,
+      label: 'Brotes por estrés',
+      beforeLabel: 'Día 1',
+      afterLabel: 'Día 3 usando Dots',
+      beforeImg: '/before-after/2-before.jpg',
+      afterImg: '/before-after/2-after.jpg',
+    },
+  ];
+
+  const faqs = [
+    {
+      q: '¿Puedo dormir con el parche puesto?',
+      a: 'Sí. De hecho, funciona mejor si lo dejas mínimo 6–8 horas o toda la noche sobre la espinilla.',
+    },
+    {
+      q: '¿Funciona en espinillas internas (sin punto blanco)?',
+      a: 'Dots está pensado principalmente para espinillas con punto blanco. En espinillas internas puede ayudar a proteger la zona, pero el resultado puede ser más lento o menos visible.',
+    },
+    {
+      q: '¿Es seguro para piel sensible?',
+      a: 'Usamos material hidrocoloide sin fragancia. Aun así, si tu piel es muy reactiva o estás en tratamiento dermatológico, consulta a tu dermatólogo antes de usarlo y suspende si notas irritación.',
+    },
+    {
+      q: '¿Desde qué edad se puede usar?',
+      a: 'Recomendado a partir de los 12 años con supervisión de un adulto. En menores, siempre consulta primero con un profesional de la salud.',
+    },
+    {
+      q: '¿Puedo usarlos todos los días?',
+      a: 'Puedes usar Dots siempre que tengas espinillas puntuales. Evita colocarlo sobre piel rota o heridas abiertas.',
+    },
+    {
+      q: '¿Cuánto tarda el envío?',
+      a: 'En Santo Domingo, Santiago y Punta Cana normalmente entre 24–72 horas laborales. Para el resto del país, el tiempo puede variar según el mensajero.',
+    },
+  ];
 
   return (
     <main
@@ -137,6 +217,10 @@ export default async function Home() {
               <strong>invisible</strong> y <strong>evita que la toques</strong>.
             </p>
 
+            <p className="mt-2 text-sm text-neutral-700">
+              {productPackLabel} · {productPriceLabel}
+            </p>
+
             {/* Chips “stickers” con color */}
             <ul className="mt-4 flex flex-wrap gap-2">
               {chips.map((c) => (
@@ -149,88 +233,75 @@ export default async function Home() {
               ))}
             </ul>
 
-            {/* Social proof avatars */}
-            <div className="mt-4 flex items-center gap-3">
-              <div className="flex -space-x-2">
-                {buyers.map((src, i) => (
-                  <Image
-                    key={i}
-                    src={src}
-                    alt=""
-                    width={28}
-                    height={28}
-                    className="h-7 w-7 rounded-full ring-2 ring-white object-cover"
-                  />
-                ))}
-              </div>
-              <span className="text-sm opacity-80">
-                +500 chicas felices este mes 💕
-              </span>
-            </div>
+{/* Social proof avatars */}
+<div className="mt-4 flex items-center gap-3">
+  <div className="flex -space-x-2">
+    {buyers.map((src, i) => (
+      <Image
+        key={i}
+        src={src}
+        alt={`Clienta feliz ${i + 1}`}
+        width={28}
+        height={28}
+        className="h-7 w-7 rounded-full ring-2 ring-white object-cover"
+      />
+    ))}
+  </div>
+  <span className="text-sm opacity-80">
+    +500 chicas felices este mes 💕
+  </span>
+</div>
+
 
             {/* CTA con color principal */}
-            <div className="mt-6 flex items-center gap-4">
-              <form action={buyNowAction}>
-                <input type="hidden" name="variantId" value={first?.id} />
-                <input type="hidden" name="quantity" value="1" />
-                <button
-                  className="rounded-2xl px-6 py-3 bg-[var(--dots-blue)] text-white shadow hover:shadow-lg transition hover:-translate-y-0.5 inline-flex items-center gap-2 disabled:opacity-60"
-                  type="submit"
-                  disabled={!canBuy}
-                >
-                  <Sparkles className="h-5 w-5" />
-                  Comprar ahora
-                </button>
-              </form>
+            <div className="mt-6 flex flex-col gap-3">
+              <div className="flex items-center gap-4">
+                <form action={buyNowAction}>
+                  <input type="hidden" name="variantId" value={first?.id} />
+                  <input type="hidden" name="quantity" value="1" />
+                  <button
+                    className="rounded-2xl px-6 py-3 bg-[var(--dots-blue)] text-white shadow hover:shadow-lg transition hover:-translate-y-0.5 inline-flex items-center gap-2 disabled:opacity-60"
+                    type="submit"
+                    disabled={!canBuy}
+                  >
+                    <Sparkles className="h-5 w-5" />
+                    Comprar ahora
+                  </button>
+                </form>
+              </div>
+
+              {/* Badges de confianza */}
+              <div className="flex flex-wrap gap-3 text-xs text-neutral-600">
+                <div className="inline-flex items-center gap-1">
+                  <CheckCircle2 className="h-4 w-4 text-[var(--dots-blue)]" />
+                  Pago seguro
+                </div>
+                <div className="inline-flex items-center gap-1">
+                  <CheckCircle2 className="h-4 w-4 text-[var(--dots-blue)]" />
+                  Envío discreto
+                </div>
+                <div className="inline-flex items-center gap-1">
+                  <CheckCircle2 className="h-4 w-4 text-[var(--dots-blue)]" />
+                  Hecho para piel sensible*
+                </div>
+              </div>
             </div>
           </div>
 
           {/* Video derecha con marco de color */}
-          <div>
-            <h2 className="mb-3 text-sm font-medium text-neutral-700">
-              Cómo funciona — video explicativo en 2 minutos
-            </h2>
+{/* Imagen del producto derecha */}
+<div>
+  <div className="relative aspect-[4/5] w-full overflow-hidden rounded-3xl shadow-lg ring-2 ring-[var(--dots-blue)]/20 bg-[var(--dots-blue)]/10">
+    <Image
+      src="/herodots.png"
+      alt="Empaque de Dots parches para espinillas"
+      fill
+      className="object-contain md:object-cover"
+      priority
+    />
+  </div>
+</div>
 
-            <div className="relative aspect-[9/16] md:aspect-[4/5] w-full overflow-hidden rounded-3xl shadow-lg ring-2 ring-[var(--dots-blue)]/20 bg-[var(--dots-blue)]/10">
-              <video
-                className="absolute inset-0 h-full w-full object-cover"
-                autoPlay
-                playsInline
-                muted
-                loop
-                poster="/hero-poster.jpg"
-                controls
-              >
-                <source src="/hero.mp4" type="video/mp4" />
-              </video>
-
-              {/* Play ring decorativo en degradé brand */}
-              <div
-                aria-hidden
-                className="absolute left-4 bottom-4 grid place-items-center h-12 w-12 rounded-full"
-                style={{
-                  background:
-                    'conic-gradient(#4EACD8 0 40%, #B283AF 40% 70%, #E4B484 70% 100%)',
-                }}
-              >
-                <span className="grid place-items-center h-10 w-10 rounded-full bg-white/90 backdrop-blur">
-                  <svg viewBox="0 0 24 24" className="h-5 w-5">
-                    <path d="M8 5v14l11-7z" fill="currentColor" />
-                  </svg>
-                </span>
-              </div>
-
-              {!heroImg && (
-                <Image
-                  src="/hero-poster.jpg"
-                  alt={product.title}
-                  fill
-                  className="object-cover"
-                  priority
-                />
-              )}
-            </div>
-          </div>
         </div>
       </Section>
 
@@ -271,9 +342,21 @@ export default async function Home() {
       >
         <div className="grid md:grid-cols-3 gap-6">
           {[
-            { n: '1', t: 'Limpia y seca', d: 'Asegúrate de que la piel esté limpia y completamente seca.' },
-            { n: '2', t: 'Aplica el parche', d: 'Colócalo cubriendo por completo la espinilla (ideal con punto blanco).' },
-            { n: '3', t: 'Déjalo actuar', d: 'Mínimo 6–8 h o toda la noche. Retira y, si hace falta, repite.' },
+            {
+              n: '1',
+              t: 'Limpia y seca',
+              d: 'Asegúrate de que la piel esté limpia y completamente seca.',
+            },
+            {
+              n: '2',
+              t: 'Aplica el parche',
+              d: 'Colócalo cubriendo por completo la espinilla (ideal con punto blanco).',
+            },
+            {
+              n: '3',
+              t: 'Déjalo actuar',
+              d: 'Mínimo 6–8 h o toda la noche. Retira y, si hace falta, repite.',
+            },
           ].map((s, idx) => (
             <div
               key={s.n}
@@ -293,7 +376,123 @@ export default async function Home() {
           ))}
         </div>
         <p className="text-xs opacity-60 mt-4">
-          Solo uso externo. No usar en heridas abiertas. Suspende si hay irritación. No usar si eres alérgico a pectina o caucho.
+          Solo uso externo. No usar en heridas abiertas. Suspende si hay irritación. No usar si
+          eres alérgico a pectina o caucho.
+        </p>
+      </Section>
+
+      {/* DETALLES DEL PRODUCTO + PARA QUIÉN ES */}
+      <Section
+        id="detalles"
+        eyebrow="Detalles del producto"
+        title="Un parche pequeño, un cambio grande"
+        subtitle="Pensado para espinillas puntuales, brotes por estrés y emergencias antes de una salida importante."
+        className="bg-white/70 backdrop-blur rounded-3xl"
+      >
+        <div className="grid gap-8 md:grid-cols-2">
+          <div className="space-y-3 text-sm">
+            <h3 className="font-semibold text-[var(--dots-black)] mb-2">
+              ¿Qué trae cada cajita?
+            </h3>
+            <ul className="space-y-2">
+              <li className="flex items-start gap-2">
+                <CheckCircle2 className="mt-0.5 h-4 w-4 text-[var(--dots-blue)]" />
+                <span>{productPackLabel}</span>
+              </li>
+              <li className="flex items-start gap-2">
+                <CheckCircle2 className="mt-0.5 h-4 w-4 text-[var(--dots-blue)]" />
+                <span>2 tamaños de parches para diferentes tipos de espinillas.</span>
+              </li>
+              <li className="flex items-start gap-2">
+                <CheckCircle2 className="mt-0.5 h-4 w-4 text-[var(--dots-blue)]" />
+                <span>Material hidrocoloide sin fragancia, suave con tu piel.</span>
+              </li>
+              <li className="flex items-start gap-2">
+                <CheckCircle2 className="mt-0.5 h-4 w-4 text-[var(--dots-blue)]" />
+                <span>Manual rápido de uso y tips para aprovecharlo al máximo.</span>
+              </li>
+            </ul>
+            <p className="mt-3 text-sm font-medium text-[var(--dots-black)]">
+              Precio: {productPriceLabel}{' '}
+            </p>
+          </div>
+
+          <div className="grid gap-4 text-sm md:grid-cols-2">
+            <div>
+              <h3 className="font-semibold text-[var(--dots-black)] mb-2">Ideal para:</h3>
+              <ul className="space-y-1.5">
+                <li>Espinillas puntuales en cara y mentón.</li>
+                <li>Brotes por estrés o cambios hormonales.</li>
+                <li>Personas que se tocan mucho la cara.</li>
+                <li>Uso nocturno antes de reuniones, citas o eventos.</li>
+              </ul>
+            </div>
+            <div>
+              <h3 className="font-semibold text-[var(--dots-black)] mb-2">
+                No es para ti si:
+              </h3>
+              <ul className="space-y-1.5 text-neutral-700">
+                <li>Tienes acné severo o quístico (consulta a tu dermatólogo).</li>
+                <li>La piel está rota o con heridas abiertas.</li>
+                <li>Eres alérgica a pectina o materiales similares al caucho.</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </Section>
+
+      {/* ANTES / DESPUÉS */}
+      <Section
+        id="antes-despues"
+        eyebrow="Antes / Después"
+        title="Resultados que se notan al despertar"
+        subtitle="Fotos reales usando Dots en espinillas puntuales. Los resultados pueden variar según tu piel."
+        className="rounded-3xl"
+      >
+        <div className="grid gap-6 md:grid-cols-2">
+          {beforeAfterPhotos.map((item) => (
+            <div
+              key={item.id}
+              className="rounded-2xl border bg-white/80 p-4 shadow-sm"
+              style={{ borderColor: 'rgba(12,12,12,0.08)' }}
+            >
+              <p className="mb-3 text-sm font-semibold text-[var(--dots-black)]">
+                {item.label}
+              </p>
+              <div className="grid grid-cols-2 gap-3 text-xs">
+                <div>
+                  <div className="mb-1 text-[10px] uppercase tracking-wide text-neutral-500">
+                    {item.beforeLabel}
+                  </div>
+                  <div className="relative w-full overflow-hidden rounded-xl bg-neutral-50 aspect-square">
+                    <Image
+                      src={item.beforeImg}
+                      alt={`${item.label} antes`}
+                      fill
+                      className="object-cover"
+                    />
+                  </div>
+                </div>
+                <div>
+                  <div className="mb-1 text-[10px] uppercase tracking-wide text-neutral-500">
+                    {item.afterLabel}
+                  </div>
+                  <div className="relative w-full overflow-hidden rounded-xl bg-neutral-50 aspect-square">
+                    <Image
+                      src={item.afterImg}
+                      alt={`${item.label} después`}
+                      fill
+                      className="object-cover"
+                    />
+                  </div>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+        <p className="mt-4 text-xs opacity-60">
+          Resultados ilustrativos. Cada piel es diferente; combina Dots con una rutina adecuada y
+          consulta a tu dermatólogo si tienes dudas.
         </p>
       </Section>
 
@@ -302,7 +501,7 @@ export default async function Home() {
         id="ingredientes"
         eyebrow="Ingredientes"
         title="Lo que hace la diferencia"
-        subtitle="Fórmula efectiva y amable con tu piel"
+        subtitle="Fórmula efectiva y amable con tu piel."
         className="bg-white/70 backdrop-blur rounded-3xl"
       >
         <div className="grid md:grid-cols-3 gap-6">
@@ -334,15 +533,59 @@ export default async function Home() {
             </div>
           ))}
         </div>
-        <p className="text-xs opacity-60 mt-4">Consulta el INCI exacto en el empaque y la ficha del producto.</p>
+        <p className="text-xs opacity-60 mt-4">Consulta el INCI exacto en el empaque.</p>
+      </Section>
+
+      {/* ACNÉ 101 / EDUCATIVO */}
+      <Section
+        id="acne101"
+        eyebrow="Acné 101"
+        title="Qué pasa en tu piel y cómo ayuda Dots"
+        subtitle="No prometemos milagros, pero sí acompañarte mejor con información clara y productos útiles."
+        className="rounded-3xl"
+      >
+        <div className="grid gap-6 md:grid-cols-3 text-sm">
+          <div>
+            <h3 className="mb-2 font-semibold text-[var(--dots-black)]">
+              1. El poro se tapa
+            </h3>
+            <p className="text-neutral-700">
+              Entre grasa, células muertas y maquillaje, el poro se puede tapar. Eso crea el
+              ambiente perfecto para que aparezca la espinilla.
+            </p>
+          </div>
+          <div>
+            <h3 className="mb-2 font-semibold text-[var(--dots-black)]">
+              2. Tocas, rascas, inflamas
+            </h3>
+            <p className="text-neutral-700">
+              Cuando explotas o rascas, sueles empeorar la inflamación, abres la piel y aumentas el
+              riesgo de manchas y marcas.
+            </p>
+          </div>
+          <div>
+            <h3 className="mb-2 font-semibold text-[var(--dots-black)]">
+              3. El rol de un parche hidrocoloide
+            </h3>
+            <p className="text-neutral-700">
+              Dots cubre la espinilla, ayuda a absorber impurezas, reduce la fricción y te recuerda
+              que no debes tocarte la cara. Menos manipulación, menos drama.
+            </p>
+          </div>
+        </div>
+        <p className="mt-4 flex items-start gap-1 text-xs text-neutral-500">
+          <Info className="mt-[2px] h-3 w-3" />
+          Dots no sustituye un tratamiento médico. Si tu acné es severo o te causa dolor, busca
+          atención profesional.
+        </p>
       </Section>
 
       {/* DÓNDE COMPRAR con micro-interacción y acentos */}
       <Section
         id="donde-comprar"
         eyebrow="Dónde comprar"
-        title="Disponible en:"
-        subtitle="Encuéntranos en supermercados, farmacias y otros puntos de venta."
+        title="Consigue tus Dots aquí"
+        subtitle="Pídelo online o encuéntralo muy pronto en puntos de venta físicos."
         className="rounded-3xl"
       >
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 md:gap-6">
@@ -372,7 +615,7 @@ export default async function Home() {
                   className="h-10 w-auto object-contain transition group-hover:scale-105 opacity-90 group-hover:opacity-100"
                 />
               ) : (
-                <span className="text-sm font-medium">{r.name}</span>
+                <span className="text-sm font-medium text-center">{r.name}</span>
               )}
             </a>
           ))}
@@ -382,8 +625,8 @@ export default async function Home() {
         </p>
         <p className="mt-4 text-xs text-neutral-600">
           ¿Eres tienda y quieres vender Dots? Escríbenos a{' '}
-          <a href="mailto:ventas@dots.com.do" className="underline">
-            ventas@dots.com.do
+          <a href="mailto:hola@dots.com.do" className="underline">
+            hola@dots.com.do
           </a>.
         </p>
       </Section>
@@ -392,15 +635,16 @@ export default async function Home() {
       <Section
         id="testimonios"
         eyebrow="Testimonios"
-        title="Lo que dicen nuestros clientes"
-        subtitle="Resultados reales de emprendedores de toda LATAM."
+        title="Lo que dicen quienes ya probaron Dots"
+        subtitle="Historias reales de personas que cambiaron cómo manejan sus espinillas."
         className="bg-white/70 backdrop-blur rounded-3xl"
       >
         {/* Móvil: carrusel */}
         <div className="md:hidden -mx-6 px-6 overflow-x-auto scroll-smooth snap-x snap-mandatory">
           <div className="flex gap-4 w-max">
             {testimonios.map((t, i) => {
-              const label = beforeAfter[i % beforeAfter.length]?.caption || t.quote;
+              const label =
+                beforeAfterLabels[i % beforeAfterLabels.length]?.caption || t.quote;
               const badgeBg =
                 i % 3 === 0
                   ? 'bg-[var(--dots-blue)]'
@@ -432,10 +676,15 @@ export default async function Home() {
                     <div className="text-xs text-neutral-500">ᐸᐳ Testimonio</div>
                   </div>
 
-                  <p className="mt-3 text-sm text-neutral-800">{label}</p>
+                  <p className="mt-3 text-sm text-neutral-800">{t.quote}</p>
 
-                  <div className="mt-3 relative aspect-[9/16] w-full overflow-hidden rounded-xl ring-2 bg-neutral-50"
-                       style={{ borderColor: 'transparent', boxShadow: '0 0 0 1px rgba(12,12,12,0.06) inset' }}>
+                  <div
+                    className="mt-3 relative aspect-[9/16] w-full overflow-hidden rounded-xl ring-2 bg-neutral-50"
+                    style={{
+                      borderColor: 'transparent',
+                      boxShadow: '0 0 0 1px rgba(12,12,12,0.06) inset',
+                    }}
+                  >
                     <video
                       className="absolute inset-0 h-full w-full object-cover"
                       controls
@@ -444,7 +693,9 @@ export default async function Home() {
                     >
                       <source src={t.video} type="video/mp4" />
                     </video>
-                    <span className={`absolute left-2 bottom-2 rounded-full ${badgeBg} text-white text-xs px-2 py-0.5`}>
+                    <span
+                      className={`absolute left-2 bottom-2 rounded-full ${badgeBg} text-white text-xs px-2 py-0.5`}
+                    >
                       {label}
                     </span>
                   </div>
@@ -457,7 +708,8 @@ export default async function Home() {
         {/* Desktop: grid */}
         <div className="hidden md:grid md:grid-cols-3 gap-6">
           {testimonios.map((t, i) => {
-            const label = beforeAfter[i % beforeAfter.length]?.caption || t.quote;
+            const label =
+              beforeAfterLabels[i % beforeAfterLabels.length]?.caption || t.quote;
             const badgeBg =
               i % 3 === 0
                 ? 'bg-[var(--dots-blue)]'
@@ -465,8 +717,11 @@ export default async function Home() {
                 ? 'bg-[var(--dots-purple)]'
                 : 'bg-[var(--dots-peach)]';
             return (
-              <article key={t.name} className="rounded-2xl border bg-white p-5 shadow-sm"
-                       style={{ borderColor: 'rgba(12,12,12,0.08)' }}>
+              <article
+                key={t.name}
+                className="rounded-2xl border bg-white p-5 shadow-sm"
+                style={{ borderColor: 'rgba(12,12,12,0.08)' }}
+              >
                 <div className="flex items-start justify-between">
                   <div className="flex items-center gap-3">
                     <div className="h-10 w-10 overflow-hidden rounded-full ring-1 ring-black/5">
@@ -486,10 +741,15 @@ export default async function Home() {
                   <div className="text-xs text-neutral-500">〃 Testimonio</div>
                 </div>
 
-                <p className="mt-3 text-sm text-neutral-800">{label}</p>
+                <p className="mt-3 text-sm text-neutral-800">{t.quote}</p>
 
-                <div className="mt-4 relative aspect-[9/16] w-full overflow-hidden rounded-xl ring-2 bg-neutral-50"
-                     style={{ borderColor: 'transparent', boxShadow: '0 0 0 1px rgba(12,12,12,0.06) inset' }}>
+                <div
+                  className="mt-4 relative aspect-[9/16] w-full overflow-hidden rounded-xl ring-2 bg-neutral-50"
+                  style={{
+                    borderColor: 'transparent',
+                    boxShadow: '0 0 0 1px rgba(12,12,12,0.06) inset',
+                  }}
+                >
                   <video
                     className="absolute inset-0 h-full w-full object-cover"
                     controls
@@ -498,7 +758,9 @@ export default async function Home() {
                   >
                     <source src={t.video} type="video/mp4" />
                   </video>
-                  <span className={`absolute left-2 bottom-2 rounded-full ${badgeBg} text-white text-xs px-2 py-0.5`}>
+                  <span
+                    className={`absolute left-2 bottom-2 rounded-full ${badgeBg} text-white text-xs px-2 py-0.5`}
+                  >
                     {label}
                   </span>
                 </div>
@@ -508,61 +770,113 @@ export default async function Home() {
         </div>
       </Section>
 
-      {/* GARANTÍA / CTA FINAL con bordes de color */}
-      <Section id="comprar" className="pb-28" eyebrow="Sin riesgo" title="Garantía 30 días">
-        <div
-          className="rounded-2xl border p-6 md:p-8 bg-white/80 backdrop-blur"
-          style={{ borderColor: 'rgba(78,172,216,0.22)' }}
-        >
-          <p className="text-lg">
-            Pruébalo 30 días. Si no ves resultados, te devolvemos el dinero. Envío gratis a Santo Domingo,
-            Santiago y Punta Cana.
-          </p>
-          <div className="mt-6">
-            <form action={buyNowAction}>
-              <input type="hidden" name="variantId" value={first?.id} />
-              <input type="hidden" name="quantity" value="1" />
-              <button
-                className="rounded-2xl px-6 py-3 bg-[var(--dots-blue)] text-white shadow hover:shadow-lg transition hover:-translate-y-0.5 inline-flex items-center gap-2 disabled:opacity-60"
-                type="submit"
-                disabled={!canBuy}
-              >
-                <Sparkles className="h-5 w-5" />
-                Comprar ahora
-              </button>
-            </form>
-          </div>
+      {/* FAQ */}
+      <Section
+        id="faq"
+        eyebrow="FAQ"
+        title="Preguntas frecuentes"
+        subtitle="Resolvemos las dudas más comunes antes de que compres."
+        className="rounded-3xl bg-white/80 backdrop-blur"
+      >
+        <div className="space-y-3">
+          {faqs.map((item) => (
+            <details
+              key={item.q}
+              className="group rounded-xl border bg-white px-4 py-3 text-sm transition"
+              style={{ borderColor: 'rgba(12,12,12,0.08)' }}
+            >
+              <summary className="flex cursor-pointer list-none items-center justify-between gap-3 text-[var(--dots-black)]">
+                <span>{item.q}</span>
+                <span className="text-xs text-neutral-500 group-open:hidden">+</span>
+                <span className="hidden text-xs text-neutral-500 group-open:inline">−</span>
+              </summary>
+              <p className="mt-2 text-neutral-700">{item.a}</p>
+            </details>
+          ))}
         </div>
       </Section>
 
-      {/* Sticky bar móvil */}
-      <div className="md:hidden fixed bottom-4 left-4 right-4 z-50">
-        <div className="rounded-2xl bg-white/85 backdrop-blur border shadow-lg p-3 flex items-center justify-between"
-             style={{ borderColor: 'rgba(178,131,175,0.25)' }}>
-          <div className="text-sm">
-            <div className="font-semibold">Piel +clarita en 6–8 h ✨</div>
-            <div className="text-xs opacity-70">Envío gratis SDG, STI y PUJ</div>
-          </div>
-          <form action={buyNowAction}>
-            <input type="hidden" name="variantId" value={first?.id} />
-            <input type="hidden" name="quantity" value="1" />
-            <button
-              className="rounded-xl px-4 py-2 text-white text-sm shadow"
-              type="submit"
-              disabled={!canBuy}
-              style={{
-                background:
-                  'linear-gradient(90deg, var(--dots-blue), var(--dots-purple))',
-              }}
-            >
-              Comprar
-            </button>
-          </form>
+      {/* SOBRE DOTS */}
+      <Section
+        id="sobre-dots"
+        eyebrow="Sobre Dots"
+        title="Una marca pequeña, pero obsesionada con tu piel"
+        subtitle="Nacimos en el Caribe para acompañarte con productos simples, honestos y efectivos."
+        className="rounded-3xl"
+      >
+        <div className="grid gap-6 text-sm md:grid-cols-2">
+          <p className="text-neutral-700">
+            Dots surge de algo muy simple: el estrés de tener una espinilla justo el día menos
+            indicado. No prometemos piel perfecta de la noche a la mañana, pero sí darte una
+            herramienta que te ayude a manejar mejor esos brotes puntuales.
+          </p>
+          <p className="text-neutral-700">
+            Diseñamos el producto pensando en el clima, la humedad y la realidad de nuestra región.
+            Queremos que puedas usarlo sin vergüenza, con o sin maquillaje, y que sientas que tu
+            piel está un poquito más protegida cada vez que te pones un Dot.
+          </p>
         </div>
-      </div>
+      </Section>
+
+      {/* ENVÍOS Y PAGOS + WHATSAPP */}
+      <Section
+        id="servicioalcliente"
+        eyebrow="Servicio al Cliente"
+        title="Dots cada vez más cerca de ti."
+        subtitle="Necesitas decirnos algo? Simple, solo escríbenos."
+        className="rounded-3xl bg-white/80 backdrop-blur"
+      >
+        <div className="mt-6 flex flex-col gap-3 rounded-2xl border border-[var(--dots-blue)]/25 bg-[var(--dots-blue)]/5 p-4 text-sm md:flex-row md:items-center md:justify-between">
+          <div>
+            <p className="font-semibold text-[var(--dots-black)]">¿Tienes dudas antes de comprar?</p>
+            <p className="text-neutral-700 text-xs md:text-sm">
+              Escríbenos por WhatsApp y te ayudamos a decidir si Dots es para ti.
+            </p>
+          </div>
+          <a
+            href="https://wa.me/18498480190?text=Hola%20quiero%20informaci%C3%B3n%20sobre%20Dots"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center justify-center rounded-full px-4 py-2 text-xs font-medium text-white shadow-sm md:text-sm"
+            style={{
+              background:
+                'linear-gradient(90deg, var(--dots-blue), var(--dots-purple))',
+            }}
+          >
+            Abrir WhatsApp
+          </a>
+        </div>
+      </Section>
+
+    
+      {/* FOOTER */}
+      <footer className="mt-8 border-t border-black/5 bg-white/70 text-xs text-neutral-600">
+        <div className="mx-auto flex max-w-5xl flex-col gap-4 px-4 py-6 md:flex-row md:items-center md:justify-between">
+          <div>
+            <p className="font-semibold text-[var(--dots-black)]">Dots</p>
+            <p className="text-[11px]">
+              © {new Date().getFullYear()} Dots. Todos los derechos reservados.
+            </p>
+          </div>
+          <div className="flex flex-wrap items-center gap-3">
+            <a href="#sobre-dots" className="hover:underline">
+              Sobre nosotros
+            </a>
+            <a href="/terminos" className="hover:underline">
+              Términos y condiciones
+            </a>
+            <a href="/privacidad" className="hover:underline">
+              Política de privacidad
+            </a>
+            <a href="mailto:hola@dots.com.do" className="hover:underline">
+              hola@dots.com.do
+            </a>
+          </div>
+        </div>
+      </footer>
 
       {/* BOTTOM BAR DE COLOR */}
-      <div className="h-1 w-full bg-gradient-to-r from-[var(--dots-blue)] via-[var(--dots-purple)] to-[var(--dots-peach)] mt-8" />
+      <div className="h-1 w-full bg-gradient-to-r from-[var(--dots-blue)] via-[var(--dots-purple)] to-[var(--dots-peach)]" />
     </main>
   );
 }
