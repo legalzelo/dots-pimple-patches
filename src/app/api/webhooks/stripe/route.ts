@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getStripe } from '@/lib/stripe';
 import { sendOrderConfirmation } from '@/lib/email';
+import { trackPurchase } from '@/lib/klaviyo';
 import Stripe from 'stripe';
 
 export async function POST(req: NextRequest) {
@@ -24,14 +25,10 @@ export async function POST(req: NextRequest) {
     const address = (session as any).shipping_details?.address ?? null;
 
     if (email) {
-      await sendOrderConfirmation({
-        to: email,
-        name,
-        phone,
-        amount,
-        address,
-        sessionId: session.id,
-      });
+      await Promise.allSettled([
+        sendOrderConfirmation({ to: email, name, phone, amount, address, sessionId: session.id }),
+        trackPurchase({ email, name, amount, orderId: session.id }),
+      ]);
     }
   }
 

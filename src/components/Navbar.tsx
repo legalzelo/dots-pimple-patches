@@ -35,7 +35,7 @@ export default function Navbar() {
         <div className="mx-auto max-w-6xl px-5 h-16 flex items-center justify-between gap-6">
 
           <Link href="/" aria-label="Inicio">
-            <Image src="/primarylogo.png" alt="Dots" width={90} height={32} className="h-8 w-auto" priority />
+            <Image src="/primarylogo.png" alt="Dots" width={160} height={56} className="h-12 w-auto" priority />
           </Link>
 
           <nav className="hidden md:flex items-center gap-7">

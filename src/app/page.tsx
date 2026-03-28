@@ -2,6 +2,7 @@ import Image from 'next/image';
 import { PRODUCT } from '@/lib/stripe';
 import StickyBuyBar from '@/components/StickyBuyBar';
 import BuyNow from '@/components/BuyNow';
+import EmailCapture from '@/components/EmailCapture';
 import { CheckCircle2, ShieldCheck, Truck, Clock, Star } from 'lucide-react';
 
 const avatars = [
@@ -401,6 +402,22 @@ export default function Home() {
               </details>
             ))}
           </div>
+        </div>
+      </section>
+
+      {/* ── EMAIL CAPTURE ────────────────────────── */}
+      <section className="py-20 px-5 bg-[var(--dots-cream)] border-t border-black/5">
+        <div className="mx-auto max-w-lg text-center">
+          <div className="inline-flex items-center gap-2 rounded-full bg-[var(--dots-purple)]/10 border border-[var(--dots-purple)]/20 px-4 py-1.5 text-xs font-semibold text-[var(--dots-purple)] mb-5">
+            💌 Club Dots — Solo para miembras
+          </div>
+          <h2 className="text-3xl md:text-4xl font-extrabold mb-3">
+            Tips de skincare gratis.<br />Directo a tu correo.
+          </h2>
+          <p className="text-neutral-500 mb-8 text-sm leading-relaxed">
+            Únete al club y recibe rutinas para piel con espinillas, alertas de restock y ofertas exclusivas que no publicamos en redes.
+          </p>
+          <EmailCapture />
         </div>
       </section>
 
