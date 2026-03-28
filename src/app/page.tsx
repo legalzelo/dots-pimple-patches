@@ -1,882 +1,478 @@
 import Image from 'next/image';
-import Section from '@/components/ui/Section';
-import { getSingleProduct } from '@/lib/shopify';
-import { buyNowAction } from './actions';
-import {
-  HandHeart,
-  ShieldCheck,
-  Eye,
-  Sparkles,
-  CheckCircle2,
-  Info,
-} from 'lucide-react';
+import { PRODUCT } from '@/lib/stripe';
+import StickyBuyBar from '@/components/StickyBuyBar';
+import BuyNow from '@/components/BuyNow';
+import { CheckCircle2, ShieldCheck, Truck, Clock, Star } from 'lucide-react';
 
-const buyers: string[] = [
-  "https://images.pexels.com/photos/31578023/pexels-photo-31578023.jpeg?cs=srgb&dl=pexels-estudio37rd-31578023.jpg&fm=jpg",
-  "https://images.pexels.com/photos/1387432/pexels-photo-1387432.jpeg?cs=srgb&dl=pexels-mufasa-1387432.jpg&fm=jpg",
-  "https://images.pexels.com/photos/17277431/pexels-photo-17277431.jpeg?cs=srgb&dl=pexels-krivitskiy-17277431.jpg&fm=jpg",
-  "https://images.pexels.com/photos/2505336/pexels-photo-2505336.jpeg?cs=srgb&dl=pexels-bruthethe-2505336.jpg&fm=jpg",
+const avatars = [
+  'https://images.pexels.com/photos/31578023/pexels-photo-31578023.jpeg?auto=compress&cs=tinysrgb&w=80',
+  'https://images.pexels.com/photos/1387432/pexels-photo-1387432.jpeg?auto=compress&cs=tinysrgb&w=80',
+  'https://images.pexels.com/photos/17277431/pexels-photo-17277431.jpeg?auto=compress&cs=tinysrgb&w=80',
+  'https://images.pexels.com/photos/2505336/pexels-photo-2505336.jpeg?auto=compress&cs=tinysrgb&w=80',
 ];
 
-export const revalidate = 0;
-
-export default async function Home() {
-  const handle = process.env.SINGLE_PRODUCT_HANDLE!;
-  const { product } = await getSingleProduct(handle);
-
-  if (!product) {
-    return (
-      <main className="p-8">
-        No encontré el producto. Revisa SINGLE_PRODUCT_HANDLE en el .env.
-      </main>
-    );
-  }
-
-  const first = product.variants?.edges?.[0]?.node;
-  const canBuy = !!first?.availableForSale;
-  const heroImg =
-    product.featuredImage?.url ?? product.images?.edges?.[0]?.node?.url ?? '';
-
-  // Ajusta esto a tu realidad
-  const productPriceLabel = 'RD$ 595';
-  const productPackLabel = '24 parches hidrocoloides';
-
-  // Retailers (edita a tus logos reales o usa “Muy pronto”)
-const retailers: { name: string; url?: string; logo?: string }[] = [
+const testimonios = [
   {
-    name: 'Jumbo',
-    url: 'https://www.jumbo.com.do', // si tienes la URL exacta del producto, ponla aquí
-    logo: '/jumbologo.webp',
+    name: 'Ana G.', loc: 'Santo Domingo',
+    text: '"Me puse el Dot de noche antes de una reunión importante. En la mañana la espinilla estaba casi plana. ¡No lo podía creer! 🙌"',
+    avatar: avatars[0],
   },
   {
-    name: 'Sienna Beauty Supply',
-    url: 'https://www.livesienna.com/shop/el-3245-parches-para-espinillas-dots-24und-172814?search=dots#attr=', // o la web que quieras
-    logo: '/SIENNA.png', // ajusta al nombre real del archivo en /public
+    name: 'Mariel M.', loc: 'Santiago',
+    text: '"Antes me las explotaba y me quedaban marcas oscuras por semanas. Con Dots no las toco y no hay drama. Ojalá lo hubiera conocido antes 💕"',
+    avatar: avatars[1],
   },
   {
-    name: 'Más puntos de venta pronto',
-    url: '#',
-    logo: '',
+    name: 'Sofía T.', loc: 'Santiago',
+    text: '"Lo uso debajo del maquillaje y casi no se nota. Es mi secreto antes de salir 😂✨ Ya pedí mi segunda caja."',
+    avatar: avatars[2],
+  },
+  {
+    name: 'Camila R.', loc: 'Punta Cana',
+    text: '"Compré por curiosidad y ya pedí tres cajas. Funciona de verdad. No hay cuento, lo recomiendo a todas mis amigas."',
+    avatar: avatars[3],
   },
 ];
 
-  // Textos estilo “antes/después” usados como labels en testimonios
-  const beforeAfterLabels: { caption: string }[] = [
-    { caption: 'Noche con Dots' },
-    { caption: '8 horas de uso' },
-    { caption: 'Resultados reales' },
-  ];
-
-  // Testimonios orientados a acné / piel
-const testimonios: {
-  name: string;
-  country: string;
-  avatar?: string;
-  quote: string;
-  video: string;
-  poster?: string;
-}[] = [
+const faqs = [
   {
-    name: 'Ana G.',
-    country: 'Santo Domingo, RD',
-    avatar: '/testimonials/ana.jpg',
-    quote:
-      '“Tenía una espinilla antes de una reunión importante. Me puse un Dot de noche y al otro día amaneció mucho más plano.”',
-    video: '/testimonials/ana.mp4',
-    poster: '/testimonials/ana.jpg',
+    q: '¿Cuánto tiempo lo dejo puesto?',
+    a: 'Mínimo 6–8 horas. La mayoría lo usa de noche y lo retira al despertar. Cuanto más tiempo, mejor absorción.',
   },
   {
-    name: 'Mariel M.',
-    country: 'Santiago, RD',
-    avatar: '/testimonials/mariel.jpg',
-    quote:
-      '“Antes siempre me explotaba las espinillas. Ahora me pongo un Dot y no me lo toco, así no me quedan marcas.”',
-    video: '/testimonials/mariel.mp4',
-    poster: '/testimonials/mariel.jpg',
+    q: '¿Funciona en espinillas sin punto blanco?',
+    a: 'Funciona mejor en espinillas con punto blanco (las que ya salieron a la superficie). En las internas ayuda a proteger y calmar la zona, pero el efecto visible es menor.',
   },
   {
-    name: 'Sofía T.',
-    country: 'Santiago, RD',
-    avatar: '/testimonials/sofia.jpg',
-    quote:
-      '“Me gusta porque casi no se nota y puedo usarlo debajo del maquillaje cuando tengo algo puntual.”',
-    video: '/testimonials/sofia.mp4',
-    poster: '/testimonials/sofia.jpg',
+    q: '¿Es seguro para piel sensible?',
+    a: 'Sí. El hidrocoloide médico no contiene fragancia, alcohol ni activos agresivos. Si tu piel es muy reactiva, prueba primero en una zona pequeña.',
+  },
+  {
+    q: '¿Cuánto tarda el envío?',
+    a: 'En Santo Domingo, Santiago y Punta Cana: 24–72 horas hábiles. Para el resto del país puede variar un poco según el mensajero.',
+  },
+  {
+    q: '¿Puedo usarlo con maquillaje encima?',
+    a: 'Sí. Es transparente y delgado. Aplica base suavemente encima. Siempre úsalo sobre piel limpia y seca para que pegue bien.',
+  },
+  {
+    q: '¿Cuánto sale cada parche?',
+    a: 'La caja trae 24 parches por RD$595 — eso es menos de RD$25 por parche. Menos que un café para despertar sin espinilla.',
   },
 ];
 
-
-  // Chips “stickers” y avatars para social proof
-  const chips = ['Invisible ✨', 'Barrera higiénica 🧴', 'Uso día/noche 🌙'];
-
-  // Beneficios con íconos lucide
-  const benefits = [
-    { icon: HandHeart, t: 'Aísla la zona', d: 'Evita fricción, suciedad y que te la toques.' },
-    { icon: ShieldCheck, t: 'Absorbe impurezas', d: 'Hidrocoloide que ayuda a aplacar en horas.' },
-    { icon: Eye, t: 'Invisible y cómodo', d: 'Perfil delgado, incluso debajo del maquillaje.' },
-  ] as const;
-
-  // Antes / Después (ajusta las rutas de imágenes a las reales)
-  const beforeAfterPhotos = [
-    {
-      id: 1,
-      label: 'Espinilla puntual',
-      beforeLabel: 'Antes de dormir',
-      afterLabel: 'Después de 8 h',
-      beforeImg: '/before-after/1-before.jpg',
-      afterImg: '/before-after/1-after.jpg',
-    },
-    {
-      id: 2,
-      label: 'Brotes por estrés',
-      beforeLabel: 'Día 1',
-      afterLabel: 'Día 3 usando Dots',
-      beforeImg: '/before-after/2-before.jpg',
-      afterImg: '/before-after/2-after.jpg',
-    },
-  ];
-
-  const faqs = [
-    {
-      q: '¿Puedo dormir con el parche puesto?',
-      a: 'Sí. De hecho, funciona mejor si lo dejas mínimo 6–8 horas o toda la noche sobre la espinilla.',
-    },
-    {
-      q: '¿Funciona en espinillas internas (sin punto blanco)?',
-      a: 'Dots está pensado principalmente para espinillas con punto blanco. En espinillas internas puede ayudar a proteger la zona, pero el resultado puede ser más lento o menos visible.',
-    },
-    {
-      q: '¿Es seguro para piel sensible?',
-      a: 'Usamos material hidrocoloide sin fragancia. Aun así, si tu piel es muy reactiva o estás en tratamiento dermatológico, consulta a tu dermatólogo antes de usarlo y suspende si notas irritación.',
-    },
-    {
-      q: '¿Desde qué edad se puede usar?',
-      a: 'Recomendado a partir de los 12 años con supervisión de un adulto. En menores, siempre consulta primero con un profesional de la salud.',
-    },
-    {
-      q: '¿Puedo usarlos todos los días?',
-      a: 'Puedes usar Dots siempre que tengas espinillas puntuales. Evita colocarlo sobre piel rota o heridas abiertas.',
-    },
-    {
-      q: '¿Cuánto tarda el envío?',
-      a: 'En Santo Domingo, Santiago y Punta Cana normalmente entre 24–72 horas laborales. Para el resto del país, el tiempo puede variar según el mensajero.',
-    },
-  ];
-
+export default function Home() {
   return (
-    <main
-      className="min-h-screen bg-[radial-gradient(1200px_600px_at_100%_-10%,rgba(178,131,175,0.12),transparent_60%),radial-gradient(1000px_500px_at_-10%_0,rgba(228,180,132,0.12),transparent_55%)]"
-      style={
-        {
-          ['--dots-blue' as any]: '#4EACD8',
-          ['--dots-purple' as any]: '#B283AF',
-          ['--dots-peach' as any]: '#E4B484',
-          ['--dots-black' as any]: '#0C0C0C',
-          ['--dots-white' as any]: '#FFFFFF',
-        } as React.CSSProperties
-      }
-    >
-      {/* TOP BAR DE COLOR */}
-      <div className="h-1 w-full bg-gradient-to-r from-[var(--dots-blue)] via-[var(--dots-purple)] to-[var(--dots-peach)]" />
+    <main className="overflow-x-hidden">
 
-      {/* HERO — izquierda minimal con detalles y color */}
-      <Section id="hero" className="pt-10 md:pt-16 relative">
-        {/* Blobs de color sutiles */}
-        <div
-          aria-hidden
-          className="pointer-events-none absolute -z-10 right-[-20%] top-[-10%] h-[60vw] w-[60vw] rounded-full blur-3xl opacity-70"
-          style={{
-            background:
-              'radial-gradient(closest-side, rgba(78,172,216,.22), transparent 65%)',
-          }}
-        />
-        <div
-          aria-hidden
-          className="pointer-events-none absolute -z-10 left-[-25%] bottom-[-15%] h-[55vw] w-[55vw] rounded-full blur-3xl opacity-70"
-          style={{
-            background:
-              'radial-gradient(closest-side, rgba(178,131,175,.18), transparent 65%)',
-          }}
-        />
+      {/* ── ANNOUNCEMENT BAR ─────────────────────── */}
+      <div className="bg-[var(--dots-dark)] text-white text-center text-xs py-2.5 px-4 font-medium tracking-wide">
+        🚚 Envío a toda República Dominicana · Entrega en 24–72 horas · Pago 100% seguro
+      </div>
 
-        <div className="grid md:grid-cols-2 gap-10 items-center">
-          <div>
-            <p className="sr-only">Envío gratis en República Dominicana</p>
+      {/* ── HERO ─────────────────────────────────── */}
+      <section id="hero" className="relative min-h-[92vh] flex items-center bg-[var(--dots-cream)] px-5 py-16 md:py-0 overflow-hidden">
 
-            <span className="inline-flex items-center gap-2 rounded-full border px-3 py-1 text-xs bg-white/70 backdrop-blur border-[var(--dots-blue)]/20 text-[var(--dots-blue)]">
-              <Sparkles className="h-4 w-4" />
-              Nuevo look Dots
-            </span>
+        <div aria-hidden className="absolute -top-40 -right-40 w-[700px] h-[700px] rounded-full bg-[var(--dots-blue)]/10 blur-[120px] pointer-events-none" />
+        <div aria-hidden className="absolute -bottom-40 -left-20 w-[500px] h-[500px] rounded-full bg-[var(--dots-purple)]/10 blur-[100px] pointer-events-none" />
 
-            <h1 className="mt-3 text-4xl md:text-6xl font-extrabold leading-tight text-[var(--dots-black)] tracking-tight">
-              El enemigo de las espinillas.
+        <div className="mx-auto max-w-6xl w-full grid md:grid-cols-2 gap-12 md:gap-16 items-center">
+
+          {/* LEFT — copy */}
+          <div className="order-2 md:order-1 flex flex-col gap-6">
+
+            <div className="inline-flex items-center gap-2 self-start rounded-full bg-[var(--dots-blue)]/10 border border-[var(--dots-blue)]/20 px-4 py-1.5 text-xs font-semibold text-[var(--dots-blue)]">
+              🇩🇴 El parche anti-espinillas #1 en RD
+            </div>
+
+            <h1 className="text-5xl md:text-6xl lg:text-7xl font-extrabold leading-[1.05] text-[var(--dots-dark)]">
+              Aplana tu<br />
+              espinilla.<br />
+              <span className="text-[var(--dots-blue)]">Esta noche.</span>
             </h1>
 
-            <p className="mt-4 text-lg text-neutral-800">
-              Elimina las espinillas en tan solo <strong>6–8 h</strong>. Es{' '}
-              <strong>invisible</strong> y <strong>evita que la toques</strong>.
+            <p className="text-lg text-neutral-500 leading-relaxed max-w-md">
+              El hidrocoloide médico que absorbe tu espinilla mientras duermes.
+              Sin explotarla. Sin cicatrices. <strong className="text-[var(--dots-dark)]">Resultado visible en 1 noche.</strong>
             </p>
 
-            <p className="mt-2 text-sm text-neutral-700">
-              {productPackLabel} · {productPriceLabel}
-            </p>
+            {/* Rating + social proof */}
+            <div className="flex items-center gap-4">
+              <div className="flex items-center gap-2">
+                <div className="flex gap-0.5">
+                  {[...Array(5)].map((_, i) => <Star key={i} className="h-4 w-4 fill-amber-400 text-amber-400" />)}
+                </div>
+                <span className="text-sm font-bold text-[var(--dots-dark)]">4.9</span>
+                <span className="text-sm text-neutral-400">· +500 reseñas verificadas</span>
+              </div>
+            </div>
 
-            {/* Chips “stickers” con color */}
-            <ul className="mt-4 flex flex-wrap gap-2">
-              {chips.map((c) => (
-                <li
-                  key={c}
-                  className="px-3 py-1 rounded-full text-xs bg-[var(--dots-purple)]/12 text-[var(--dots-purple)] border border-[var(--dots-purple)]/25"
-                >
-                  {c}
+            <div className="flex -space-x-2.5 items-center">
+              {avatars.map((src, i) => (
+                <Image key={i} src={src} alt="" width={36} height={36}
+                  className="h-9 w-9 rounded-full ring-2 ring-[var(--dots-cream)] object-cover" />
+              ))}
+              <span className="ml-4 text-sm text-neutral-500">+500 chicas satisfechas este mes</span>
+            </div>
+
+            {/* Price + CTA */}
+            <div className="flex flex-col gap-2">
+              <div className="flex items-baseline gap-2">
+                <span className="text-4xl font-extrabold text-[var(--dots-dark)]">{PRODUCT.priceLabel}</span>
+                <span className="text-sm text-neutral-400 line-through">RD$850</span>
+                <span className="text-sm font-bold text-green-600 bg-green-50 px-2 py-0.5 rounded-full">-30%</span>
+              </div>
+              <p className="text-xs text-neutral-400">24 parches · Solo RD$24 por parche · Menos que un café ☕</p>
+            </div>
+
+            <div className="flex flex-col sm:flex-row gap-3">
+              <BuyNow
+                label={`Quiero mis Dots — ${PRODUCT.priceLabel} →`}
+                className="flex-1 sm:flex-none rounded-full bg-[var(--dots-dark)] text-white px-8 py-4 text-base font-bold hover:bg-[var(--dots-blue)] transition-colors shadow-lg shadow-black/10 inline-flex items-center justify-center gap-2 disabled:opacity-60"
+              />
+              <a href="https://wa.me/18498480190?text=Hola%20quiero%20info%20sobre%20Dots"
+                target="_blank" rel="noopener noreferrer"
+                className="rounded-full border-2 border-black/10 text-[var(--dots-dark)] px-7 py-4 text-base font-semibold hover:border-[var(--dots-blue)]/40 hover:text-[var(--dots-blue)] transition text-center whitespace-nowrap">
+                Tengo una pregunta
+              </a>
+            </div>
+
+            {/* Trust pills */}
+            <div className="flex flex-wrap gap-2">
+              {[
+                { icon: ShieldCheck, text: 'Hidrocoloide médico' },
+                { icon: Truck, text: 'Envío discreto' },
+                { icon: Clock, text: 'Entrega 24–72 h' },
+              ].map(({ icon: Icon, text }) => (
+                <span key={text} className="inline-flex items-center gap-1.5 text-xs text-neutral-500 bg-white border border-black/6 rounded-full px-3 py-1.5 font-medium">
+                  <Icon className="h-3.5 w-3.5 text-[var(--dots-blue)]" /> {text}
+                </span>
+              ))}
+            </div>
+          </div>
+
+          {/* RIGHT — product image */}
+          <div className="order-1 md:order-2 flex justify-center">
+            <div className="relative">
+              <div className="relative w-72 md:w-80 aspect-[3/4] rounded-[2rem] bg-gradient-to-br from-[var(--dots-blue)]/15 via-white to-[var(--dots-purple)]/15 border border-white shadow-2xl overflow-hidden">
+                <Image src="/herodots.png" alt="Dots — Parches anti-espinillas" fill
+                  className="object-contain p-8" priority />
+              </div>
+
+              <div className="absolute -left-10 top-1/3 bg-white rounded-2xl shadow-xl border border-black/5 px-4 py-3 text-center min-w-[110px]">
+                <p className="text-2xl font-extrabold text-[var(--dots-blue)]">8h</p>
+                <p className="text-xs text-neutral-400 font-medium">de absorción</p>
+              </div>
+
+              <div className="absolute -right-8 bottom-1/3 bg-white rounded-2xl shadow-xl border border-black/5 px-4 py-3 text-center min-w-[120px]">
+                <p className="text-2xl font-extrabold text-[var(--dots-purple)]">24</p>
+                <p className="text-xs text-neutral-400 font-medium">parches por caja</p>
+              </div>
+
+              <div className="absolute -top-4 right-4 bg-[var(--dots-blue)] text-white text-xs font-bold rounded-full px-4 py-2 shadow-lg">
+                {PRODUCT.priceLabel}
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* ── TICKER ───────────────────────────────── */}
+      <div className="bg-[var(--dots-dark)] text-white py-4 overflow-hidden">
+        <div className="flex items-center gap-10 animate-[marquee_25s_linear_infinite] whitespace-nowrap w-max px-6">
+          {[...Array(3)].map((_, rep) => (
+            <div key={rep} className="flex items-center gap-10">
+              {[
+                '⭐ 4.9 / 5 · +500 reseñas',
+                '💊 Hidrocoloide médico certificado',
+                '✨ Resultado visible en 1 noche',
+                '🇩🇴 Envío a todo RD en 24–72 h',
+                '💰 Solo RD$24 por parche',
+                '🚫 Sin fragancia · Sin alcohol',
+              ].map(item => (
+                <span key={item} className="text-sm font-medium opacity-80 flex-shrink-0">{item}</span>
+              ))}
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* ── PROBLEMA ─────────────────────────────── */}
+      <section className="bg-[var(--dots-dark)] text-white py-20 px-5">
+        <div className="mx-auto max-w-4xl text-center">
+          <p className="text-xs uppercase tracking-[0.2em] text-[var(--dots-blue)] font-semibold mb-4">¿Te suena familiar?</p>
+          <h2 className="text-4xl md:text-5xl font-extrabold leading-tight mb-4">
+            La espinilla del peor día posible.
+          </h2>
+          <p className="text-neutral-400 text-lg max-w-lg mx-auto mb-12">
+            La explotaste. La tocaste. Quedó peor. Y encima, te quedó la marca.<br />
+            Ya sabemos. Por eso existe Dots.
+          </p>
+          <div className="grid sm:grid-cols-3 gap-4 text-left">
+            {[
+              { emoji: '😤', title: 'La explotaste', desc: 'Sabías que no debías. Pero lo hiciste igual. Y quedó el doble de inflamada.' },
+              { emoji: '🤦‍♀️', title: 'No podías parar de tocarla', desc: 'Sin querer la tocaste diez veces. El calor de los dedos empeora todo.' },
+              { emoji: '😢', title: 'Quedó la marca oscura', desc: 'La espinilla se fue pero dejó su "souvenir" por semanas. A veces meses.' },
+            ].map(c => (
+              <div key={c.title} className="rounded-2xl border border-white/8 bg-white/5 p-6">
+                <div className="text-3xl mb-3">{c.emoji}</div>
+                <h3 className="font-bold text-white mb-1">{c.title}</h3>
+                <p className="text-sm text-neutral-400 leading-relaxed">{c.desc}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ── BENEFICIOS ───────────────────────────── */}
+      <section id="beneficios" className="py-20 px-5 bg-[var(--dots-cream)]">
+        <div className="mx-auto max-w-6xl">
+          <div className="text-center mb-14">
+            <p className="text-xs uppercase tracking-[0.2em] text-[var(--dots-blue)] font-semibold mb-3">Por qué funciona de verdad</p>
+            <h2 className="text-4xl md:text-5xl font-extrabold">La ciencia es simple.</h2>
+            <p className="text-neutral-500 mt-3 max-w-md mx-auto">El hidrocoloide médico crea el ambiente perfecto para que la espinilla sane — sin que la toques.</p>
+          </div>
+
+          <div className="grid md:grid-cols-2 gap-5">
+            {[
+              { n: '01', title: 'Crea una barrera protectora', desc: 'Evita que la toques, frotas o contamines. Ese contacto constante es lo que inflama y deja marca.', color: 'var(--dots-blue)' },
+              { n: '02', title: 'Absorbe lo que hay dentro', desc: 'El hidrocoloide médico succiona las impurezas. Al retirarlo verás el parche blanco — eso es que funcionó.', color: 'var(--dots-purple)' },
+              { n: '03', title: 'Invisible bajo el maquillaje', desc: 'Transparente y ultra-delgado. Úsalo de día sin que nadie lo note. Ideal para citas, trabajo o fotos.', color: 'var(--dots-peach)' },
+              { n: '04', title: 'Reduce el riesgo de marcas oscuras', desc: 'Al no manipular la espinilla, evitas la hiperpigmentación post-inflamatoria. Menos drama, menos cicatrices.', color: 'var(--dots-blue)' },
+            ].map(b => (
+              <div key={b.n} className="group flex gap-5 rounded-2xl border border-black/6 bg-white p-6 hover:shadow-lg hover:-translate-y-0.5 transition">
+                <div className="shrink-0 text-sm font-extrabold opacity-20 group-hover:opacity-70 transition mt-1" style={{ color: b.color }}>
+                  {b.n}
+                </div>
+                <div>
+                  <h3 className="font-bold text-[var(--dots-dark)] text-lg mb-1">{b.title}</h3>
+                  <p className="text-neutral-500 leading-relaxed">{b.desc}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ── CÓMO FUNCIONA ────────────────────────── */}
+      <section id="como-funciona" className="py-20 px-5 bg-white">
+        <div className="mx-auto max-w-3xl">
+          <div className="text-center mb-14">
+            <p className="text-xs uppercase tracking-[0.2em] text-[var(--dots-blue)] font-semibold mb-3">Tan simple como esto</p>
+            <h2 className="text-4xl md:text-5xl font-extrabold">3 pasos.<br />Una noche.<br />Otra piel.</h2>
+          </div>
+
+          <div className="space-y-4">
+            {[
+              { n: '1', title: 'Lávate la cara y sécala bien', desc: 'Piel limpia y completamente seca. Sin cremas ni aceites encima — el parche no pegará si hay producto.', color: 'var(--dots-blue)' },
+              { n: '2', title: 'Aplica el Dot directo sobre la espinilla', desc: 'Cúbrela completamente. Presiona los bordes suavemente 10 segundos para que selle. Listo.', color: 'var(--dots-purple)' },
+              { n: '3', title: 'Duerme. Retíralo en la mañana.', desc: 'Mínimo 6–8 horas. Si lo ves blanco al retirarlo, funcionó. Si hace falta, repite una noche más.', color: 'var(--dots-dark)' },
+            ].map((s) => (
+              <div key={s.n} className="flex items-start gap-5 rounded-2xl p-6 bg-[var(--dots-cream)] border border-black/5">
+                <div className="shrink-0 h-12 w-12 rounded-full flex items-center justify-center text-white font-extrabold text-lg" style={{ background: s.color }}>
+                  {s.n}
+                </div>
+                <div>
+                  <h3 className="font-bold text-[var(--dots-dark)] text-lg">{s.title}</h3>
+                  <p className="text-neutral-500 mt-0.5 leading-relaxed">{s.desc}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          <p className="text-center text-xs text-neutral-400 mt-8">
+            Solo uso externo · No usar en heridas abiertas · Suspende si hay irritación · Consulta tu dermatólogo si tienes acné severo
+          </p>
+        </div>
+      </section>
+
+      {/* ── TESTIMONIOS ──────────────────────────── */}
+      <section id="testimonios" className="py-20 px-5 bg-[var(--dots-cream)]">
+        <div className="mx-auto max-w-6xl">
+          <div className="text-center mb-14">
+            <p className="text-xs uppercase tracking-[0.2em] text-[var(--dots-blue)] font-semibold mb-3">Resultados reales</p>
+            <h2 className="text-4xl md:text-5xl font-extrabold">Ellas lo probaron.<br />Tú decides.</h2>
+            <p className="text-neutral-500 mt-3">No es publicidad. Son clientas reales de RD.</p>
+          </div>
+
+          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            {testimonios.map((t) => (
+              <div key={t.name} className="bg-white rounded-2xl border border-black/6 p-5 flex flex-col gap-4 hover:shadow-md transition">
+                <div className="flex gap-0.5">
+                  {[...Array(5)].map((_, i) => <Star key={i} className="h-4 w-4 fill-amber-400 text-amber-400" />)}
+                </div>
+                <p className="text-[var(--dots-dark)] text-sm leading-relaxed flex-1">{t.text}</p>
+                <div className="flex items-center gap-3 pt-3 border-t border-black/5">
+                  <Image src={t.avatar} alt={t.name} width={36} height={36}
+                    className="h-9 w-9 rounded-full object-cover" />
+                  <div>
+                    <p className="text-sm font-semibold text-[var(--dots-dark)]">{t.name}</p>
+                    <p className="text-xs text-neutral-400">{t.loc}</p>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ── QUÉ INCLUYE ──────────────────────────── */}
+      <section className="py-20 px-5 bg-white">
+        <div className="mx-auto max-w-5xl grid md:grid-cols-2 gap-12 items-center">
+          <div>
+            <p className="text-xs uppercase tracking-[0.2em] text-[var(--dots-blue)] font-semibold mb-3">Todo en una cajita</p>
+            <h2 className="text-4xl font-extrabold mb-2">24 parches.<br />Infinitas noches tranquilas.</h2>
+            <p className="text-neutral-500 mb-6">Solo RD$24 por parche. Menos que un café para despertar sin espinilla.</p>
+            <ul className="space-y-4">
+              {[
+                ['24 parches hidrocoloides médicos', 'Para varios brotes o repartirlos en el tiempo'],
+                ['2 tamaños en cada caja', 'Chico para espinillas puntuales, mediano para las más grandes'],
+                ['Sin fragancia ni alcohol', 'Dermatológicamente suave. Funciona igual de bien.'],
+                ['Transparentes al usar', 'Invisibles bajo maquillaje. Sin vergüenza.'],
+              ].map(([title, desc]) => (
+                <li key={title} className="flex items-start gap-3">
+                  <CheckCircle2 className="h-5 w-5 text-[var(--dots-blue)] shrink-0 mt-0.5" />
+                  <div>
+                    <p className="font-semibold text-[var(--dots-dark)]">{title}</p>
+                    <p className="text-sm text-neutral-500">{desc}</p>
+                  </div>
                 </li>
               ))}
             </ul>
-
-{/* Social proof avatars */}
-<div className="mt-4 flex items-center gap-3">
-  <div className="flex -space-x-2">
-    {buyers.map((src, i) => (
-      <Image
-        key={i}
-        src={src}
-        alt={`Clienta feliz ${i + 1}`}
-        width={28}
-        height={28}
-        className="h-7 w-7 rounded-full ring-2 ring-white object-cover"
-      />
-    ))}
-  </div>
-  <span className="text-sm opacity-80">
-    +500 chicas felices este mes 💕
-  </span>
-</div>
-
-
-            {/* CTA con color principal */}
-            <div className="mt-6 flex flex-col gap-3">
-              <div className="flex items-center gap-4">
-                <form action={buyNowAction}>
-                  <input type="hidden" name="variantId" value={first?.id} />
-                  <input type="hidden" name="quantity" value="1" />
-                  <button
-                    className="rounded-2xl px-6 py-3 bg-[var(--dots-blue)] text-white shadow hover:shadow-lg transition hover:-translate-y-0.5 inline-flex items-center gap-2 disabled:opacity-60"
-                    type="submit"
-                    disabled={!canBuy}
-                  >
-                    <Sparkles className="h-5 w-5" />
-                    Comprar ahora
-                  </button>
-                </form>
-              </div>
-
-              {/* Badges de confianza */}
-              <div className="flex flex-wrap gap-3 text-xs text-neutral-600">
-                <div className="inline-flex items-center gap-1">
-                  <CheckCircle2 className="h-4 w-4 text-[var(--dots-blue)]" />
-                  Pago seguro
-                </div>
-                <div className="inline-flex items-center gap-1">
-                  <CheckCircle2 className="h-4 w-4 text-[var(--dots-blue)]" />
-                  Envío discreto
-                </div>
-                <div className="inline-flex items-center gap-1">
-                  <CheckCircle2 className="h-4 w-4 text-[var(--dots-blue)]" />
-                  Hecho para piel sensible*
-                </div>
-              </div>
-            </div>
           </div>
 
-          {/* Video derecha con marco de color */}
-{/* Imagen del producto derecha */}
-<div>
-  <div className="relative aspect-[4/5] w-full overflow-hidden rounded-3xl shadow-lg ring-2 ring-[var(--dots-blue)]/20 bg-[var(--dots-blue)]/10">
-    <Image
-      src="/herodots.png"
-      alt="Empaque de Dots parches para espinillas"
-      fill
-      className="object-contain md:object-cover"
-      priority
-    />
-  </div>
-</div>
-
-        </div>
-      </Section>
-
-      {/* SEPARADOR DEGRADÉ */}
-      <div className="h-[2px] w-full bg-gradient-to-r from-[var(--dots-peach)] via-[var(--dots-purple)] to-[var(--dots-blue)]/70" />
-
-      {/* BENEFICIOS con íconos y colores */}
-      <Section
-        id="beneficios"
-        eyebrow="Beneficios"
-        title="Protege, aísla y acelera la recuperación"
-        subtitle="Evita tocar la zona, mantén la piel cubierta y permite que el parche haga su trabajo."
-        className="bg-white/70 backdrop-blur rounded-3xl"
-      >
-        <div className="grid md:grid-cols-3 gap-6">
-          {benefits.map(({ icon: Icon, t, d }) => (
-            <div
-              key={t}
-              className="rounded-2xl border p-6 shadow-sm hover:shadow-md hover:-translate-y-0.5 transition bg-gradient-to-b from-white to-[rgba(78,172,216,0.04)]"
-              style={{ borderColor: 'rgba(78,172,216,0.18)' }}
-            >
-              <div className="inline-flex h-10 w-10 items-center justify-center rounded-xl bg-[var(--dots-blue)]/12">
-                <Icon className="h-5 w-5 text-[var(--dots-blue)]" />
+          <div className="rounded-3xl bg-gradient-to-br from-[var(--dots-blue)]/10 to-[var(--dots-purple)]/10 p-8 flex flex-col gap-6 border border-black/5">
+            <div className="aspect-square rounded-2xl bg-white/80 flex items-center justify-center overflow-hidden">
+              <Image src="/herodots.png" alt="Dots" width={260} height={260} className="object-contain" />
+            </div>
+            <div className="space-y-1">
+              <div className="flex items-baseline gap-2">
+                <p className="text-4xl font-extrabold text-[var(--dots-dark)]">{PRODUCT.priceLabel}</p>
+                <p className="text-sm text-neutral-400 line-through">RD$850</p>
+                <span className="text-xs font-bold text-green-600 bg-green-50 px-2 py-0.5 rounded-full">Oferta</span>
               </div>
-              <h3 className="font-semibold mt-3 text-[var(--dots-black)]">{t}</h3>
-              <p className="opacity-80 text-sm">{d}</p>
+              <p className="text-xs text-neutral-400">24 parches · Solo RD$24 c/u</p>
             </div>
-          ))}
-        </div>
-      </Section>
-
-      {/* CÓMO FUNCIONA con fondo melocotón claro */}
-      <Section
-        id="como-funciona"
-        eyebrow="Cómo funciona"
-        title="3 pasos simples"
-        className="rounded-3xl"
-      >
-        <div className="grid md:grid-cols-3 gap-6">
-          {[
-            {
-              n: '1',
-              t: 'Limpia y seca',
-              d: 'Asegúrate de que la piel esté limpia y completamente seca.',
-            },
-            {
-              n: '2',
-              t: 'Aplica el parche',
-              d: 'Colócalo cubriendo por completo la espinilla (ideal con punto blanco).',
-            },
-            {
-              n: '3',
-              t: 'Déjalo actuar',
-              d: 'Mínimo 6–8 h o toda la noche. Retira y, si hace falta, repite.',
-            },
-          ].map((s, idx) => (
-            <div
-              key={s.n}
-              className="rounded-2xl p-6 border"
-              style={{
-                background:
-                  idx === 1
-                    ? 'linear-gradient(180deg, rgba(178,131,175,0.08), transparent 70%)'
-                    : 'linear-gradient(180deg, rgba(228,180,132,0.08), transparent 70%)',
-                borderColor: 'rgba(12,12,12,0.08)',
-              }}
-            >
-              <div className="text-2xl font-bold text-[var(--dots-black)]">{s.n}</div>
-              <div className="mt-2 font-semibold text-[var(--dots-black)]">{s.t}</div>
-              <div className="opacity-80 text-sm">{s.d}</div>
-            </div>
-          ))}
-        </div>
-        <p className="text-xs opacity-60 mt-4">
-          Solo uso externo. No usar en heridas abiertas. Suspende si hay irritación. No usar si
-          eres alérgico a pectina o caucho.
-        </p>
-      </Section>
-
-      {/* DETALLES DEL PRODUCTO + PARA QUIÉN ES */}
-      <Section
-        id="detalles"
-        eyebrow="Detalles del producto"
-        title="Un parche pequeño, un cambio grande"
-        subtitle="Pensado para espinillas puntuales, brotes por estrés y emergencias antes de una salida importante."
-        className="bg-white/70 backdrop-blur rounded-3xl"
-      >
-        <div className="grid gap-8 md:grid-cols-2">
-          <div className="space-y-3 text-sm">
-            <h3 className="font-semibold text-[var(--dots-black)] mb-2">
-              ¿Qué trae cada cajita?
-            </h3>
-            <ul className="space-y-2">
-              <li className="flex items-start gap-2">
-                <CheckCircle2 className="mt-0.5 h-4 w-4 text-[var(--dots-blue)]" />
-                <span>{productPackLabel}</span>
-              </li>
-              <li className="flex items-start gap-2">
-                <CheckCircle2 className="mt-0.5 h-4 w-4 text-[var(--dots-blue)]" />
-                <span>2 tamaños de parches para diferentes tipos de espinillas.</span>
-              </li>
-              <li className="flex items-start gap-2">
-                <CheckCircle2 className="mt-0.5 h-4 w-4 text-[var(--dots-blue)]" />
-                <span>Material hidrocoloide sin fragancia, suave con tu piel.</span>
-              </li>
-              <li className="flex items-start gap-2">
-                <CheckCircle2 className="mt-0.5 h-4 w-4 text-[var(--dots-blue)]" />
-                <span>Manual rápido de uso y tips para aprovecharlo al máximo.</span>
-              </li>
-            </ul>
-            <p className="mt-3 text-sm font-medium text-[var(--dots-black)]">
-              Precio: {productPriceLabel}{' '}
-            </p>
+            <BuyNow
+              label={`Comprar ahora — ${PRODUCT.priceLabel}`}
+              className="w-full rounded-full bg-[var(--dots-dark)] text-white py-4 font-bold text-sm hover:bg-[var(--dots-blue)] transition inline-flex items-center justify-center gap-2 disabled:opacity-60"
+            />
           </div>
+        </div>
+      </section>
 
-          <div className="grid gap-4 text-sm md:grid-cols-2">
-            <div>
-              <h3 className="font-semibold text-[var(--dots-black)] mb-2">Ideal para:</h3>
-              <ul className="space-y-1.5">
-                <li>Espinillas puntuales en cara y mentón.</li>
-                <li>Brotes por estrés o cambios hormonales.</li>
-                <li>Personas que se tocan mucho la cara.</li>
-                <li>Uso nocturno antes de reuniones, citas o eventos.</li>
-              </ul>
-            </div>
-            <div>
-              <h3 className="font-semibold text-[var(--dots-black)] mb-2">
-                No es para ti si:
-              </h3>
-              <ul className="space-y-1.5 text-neutral-700">
-                <li>Tienes acné severo o quístico (consulta a tu dermatólogo).</li>
-                <li>La piel está rota o con heridas abiertas.</li>
-                <li>Eres alérgica a pectina o materiales similares al caucho.</li>
-              </ul>
+      {/* ── DÓNDE MÁS ENCONTRARLO ────────────────── */}
+      <section className="py-14 px-5 bg-[var(--dots-cream)] border-t border-black/5">
+        <div className="mx-auto max-w-6xl text-center">
+          <p className="text-xs uppercase tracking-[0.2em] text-neutral-400 font-semibold mb-6">También en tiendas físicas</p>
+          <div className="inline-flex flex-wrap justify-center gap-3">
+            {[
+              { name: 'Jumbo', logo: '/jumbologo.webp', url: 'https://www.jumbo.com.do' },
+              { name: 'Sienna Beauty Supply', logo: '/SIENNA.png', url: 'https://www.livesienna.com/shop/el-3245-parches-para-espinillas-dots-24und-172814' },
+            ].map(r => (
+              <a key={r.name} href={r.url} target="_blank" rel="noopener noreferrer"
+                className="flex items-center justify-center bg-white border border-black/8 rounded-2xl px-8 py-4 hover:shadow-md hover:-translate-y-0.5 transition">
+                <Image src={r.logo} alt={r.name} width={120} height={40} className="h-9 w-auto object-contain opacity-70 hover:opacity-100 transition" />
+              </a>
+            ))}
+            <div className="flex items-center justify-center bg-white/60 border border-dashed border-black/12 rounded-2xl px-8 py-4">
+              <p className="text-xs text-neutral-400 font-medium">Más tiendas próximamente ✨</p>
             </div>
           </div>
         </div>
-      </Section>
+      </section>
 
-      {/* ANTES / DESPUÉS */}
-      <Section
-        id="antes-despues"
-        eyebrow="Antes / Después"
-        title="Resultados que se notan al despertar"
-        subtitle="Fotos reales usando Dots en espinillas puntuales. Los resultados pueden variar según tu piel."
-        className="rounded-3xl"
-      >
-        <div className="grid gap-6 md:grid-cols-2">
-          {beforeAfterPhotos.map((item) => (
-            <div
-              key={item.id}
-              className="rounded-2xl border bg-white/80 p-4 shadow-sm"
-              style={{ borderColor: 'rgba(12,12,12,0.08)' }}
-            >
-              <p className="mb-3 text-sm font-semibold text-[var(--dots-black)]">
-                {item.label}
-              </p>
-              <div className="grid grid-cols-2 gap-3 text-xs">
-                <div>
-                  <div className="mb-1 text-[10px] uppercase tracking-wide text-neutral-500">
-                    {item.beforeLabel}
-                  </div>
-                  <div className="relative w-full overflow-hidden rounded-xl bg-neutral-50 aspect-square">
-                    <Image
-                      src={item.beforeImg}
-                      alt={`${item.label} antes`}
-                      fill
-                      className="object-cover"
-                    />
-                  </div>
-                </div>
-                <div>
-                  <div className="mb-1 text-[10px] uppercase tracking-wide text-neutral-500">
-                    {item.afterLabel}
-                  </div>
-                  <div className="relative w-full overflow-hidden rounded-xl bg-neutral-50 aspect-square">
-                    <Image
-                      src={item.afterImg}
-                      alt={`${item.label} después`}
-                      fill
-                      className="object-cover"
-                    />
-                  </div>
-                </div>
-              </div>
-            </div>
-          ))}
+      {/* ── FAQ ──────────────────────────────────── */}
+      <section id="faq" className="py-20 px-5 bg-white">
+        <div className="mx-auto max-w-2xl">
+          <div className="text-center mb-12">
+            <p className="text-xs uppercase tracking-[0.2em] text-[var(--dots-blue)] font-semibold mb-3">Preguntas frecuentes</p>
+            <h2 className="text-4xl font-extrabold">¿Tienes dudas?<br />Aquí las resolvemos.</h2>
+          </div>
+          <div className="space-y-2">
+            {faqs.map(item => (
+              <details key={item.q} className="group rounded-2xl border border-black/6 bg-[var(--dots-cream)]">
+                <summary className="flex items-center justify-between gap-4 px-5 py-4 cursor-pointer list-none font-semibold text-[var(--dots-dark)]">
+                  {item.q}
+                  <span className="faq-plus shrink-0 h-6 w-6 rounded-full bg-black/5 flex items-center justify-center text-sm">+</span>
+                  <span className="faq-minus shrink-0 h-6 w-6 rounded-full bg-[var(--dots-blue)]/10 text-[var(--dots-blue)] flex items-center justify-center text-sm font-bold">−</span>
+                </summary>
+                <p className="px-5 pb-5 text-sm text-neutral-500 leading-relaxed">{item.a}</p>
+              </details>
+            ))}
+          </div>
         </div>
-        <p className="mt-4 text-xs opacity-60">
-          Resultados ilustrativos. Cada piel es diferente; combina Dots con una rutina adecuada y
-          consulta a tu dermatólogo si tienes dudas.
-        </p>
-      </Section>
+      </section>
 
-      {/* INGREDIENTES con tarjetas color-acento */}
-      <Section
-        id="ingredientes"
-        eyebrow="Ingredientes"
-        title="Lo que hace la diferencia"
-        subtitle="Fórmula efectiva y amable con tu piel."
-        className="bg-white/70 backdrop-blur rounded-3xl"
-      >
-        <div className="grid md:grid-cols-3 gap-6">
-          {[
-            { t: 'Hidrocoloide', d: 'Absorbe impurezas y protege el área mientras actúa.' },
-            { t: 'Transparente', d: 'Delgado e invisible para uso diurno o nocturno.' },
-            { t: 'Suave con la piel', d: 'Sin fragancia y pensado para acompañar tu rutina.' },
-          ].map((i, idx) => (
-            <div
-              key={i.t}
-              className="rounded-2xl border p-6"
-              style={{
-                borderColor:
-                  idx === 0
-                    ? 'rgba(78,172,216,0.25)'
-                    : idx === 1
-                    ? 'rgba(178,131,175,0.25)'
-                    : 'rgba(228,180,132,0.25)',
-                background:
-                  idx === 0
-                    ? 'linear-gradient(180deg, rgba(78,172,216,0.06), transparent 60%)'
-                    : idx === 1
-                    ? 'linear-gradient(180deg, rgba(178,131,175,0.06), transparent 60%)'
-                    : 'linear-gradient(180deg, rgba(228,180,132,0.06), transparent 60%)',
-              }}
-            >
-              <h3 className="font-semibold mb-1 text-[var(--dots-black)]">{i.t}</h3>
-              <p className="opacity-80 text-sm">{i.d}</p>
-            </div>
-          ))}
+      {/* ── CTA FINAL ────────────────────────────── */}
+      <section id="comprar" className="relative py-24 px-5 overflow-hidden"
+        style={{ background: 'linear-gradient(135deg, #111111 0%, #1a1a2e 50%, #16213e 100%)' }}>
+
+        <div aria-hidden className="absolute inset-0 pointer-events-none">
+          <div className="absolute top-0 left-1/4 w-96 h-96 rounded-full bg-[var(--dots-blue)]/15 blur-3xl" />
+          <div className="absolute bottom-0 right-1/4 w-80 h-80 rounded-full bg-[var(--dots-purple)]/15 blur-3xl" />
         </div>
-        <p className="text-xs opacity-60 mt-4">Consulta el INCI exacto en el empaque.</p>
-      </Section>
 
-      {/* ACNÉ 101 / EDUCATIVO */}
-      <Section
-        id="acne101"
-        eyebrow="Acné 101"
-        title="Qué pasa en tu piel y cómo ayuda Dots"
-        subtitle="No prometemos milagros, pero sí acompañarte mejor con información clara y productos útiles."
-        className="rounded-3xl"
-      >
-        <div className="grid gap-6 md:grid-cols-3 text-sm">
+        <div className="relative mx-auto max-w-2xl text-center text-white space-y-7">
+          <p className="text-xs uppercase tracking-[0.2em] text-[var(--dots-blue)] font-semibold">Listo para ordenar</p>
+          <h2 className="text-4xl md:text-6xl font-extrabold leading-tight">
+            Un Dot esta noche.<br />
+            <span className="text-[var(--dots-blue)]">Otra piel mañana.</span>
+          </h2>
+
           <div>
-            <h3 className="mb-2 font-semibold text-[var(--dots-black)]">
-              1. El poro se tapa
-            </h3>
-            <p className="text-neutral-700">
-              Entre grasa, células muertas y maquillaje, el poro se puede tapar. Eso crea el
-              ambiente perfecto para que aparezca la espinilla.
-            </p>
+            <p className="text-3xl font-extrabold text-white">{PRODUCT.priceLabel}</p>
+            <p className="text-neutral-400 text-sm mt-1">24 parches · Solo RD$24 por parche · Envío a todo RD</p>
           </div>
-          <div>
-            <h3 className="mb-2 font-semibold text-[var(--dots-black)]">
-              2. Tocas, rascas, inflamas
-            </h3>
-            <p className="text-neutral-700">
-              Cuando explotas o rascas, sueles empeorar la inflamación, abres la piel y aumentas el
-              riesgo de manchas y marcas.
-            </p>
-          </div>
-          <div>
-            <h3 className="mb-2 font-semibold text-[var(--dots-black)]">
-              3. El rol de un parche hidrocoloide
-            </h3>
-            <p className="text-neutral-700">
-              Dots cubre la espinilla, ayuda a absorber impurezas, reduce la fricción y te recuerda
-              que no debes tocarte la cara. Menos manipulación, menos drama.
-            </p>
-          </div>
-        </div>
-        <p className="mt-4 flex items-start gap-1 text-xs text-neutral-500">
-          <Info className="mt-[2px] h-3 w-3" />
-          Dots no sustituye un tratamiento médico. Si tu acné es severo o te causa dolor, busca
-          atención profesional.
-        </p>
-      </Section>
 
-      {/* DÓNDE COMPRAR con micro-interacción y acentos */}
-      <Section
-        id="donde-comprar"
-        eyebrow="Dónde comprar"
-        title="Consigue tus Dots aquí"
-        subtitle="Pídelo online o encuéntralo muy pronto en puntos de venta físicos."
-        className="rounded-3xl"
-      >
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 md:gap-6">
-          {retailers.map((r, idx) => (
-            <a
-              key={r.name}
-              href={r.url || '#'}
-              target={r.url ? '_blank' : undefined}
-              rel={r.url ? 'noopener noreferrer' : undefined}
-              className="group rounded-xl border bg-white p-4 md:p-5 flex items-center justify-center hover:shadow-md hover:-translate-y-0.5 transition"
-              aria-label={r.name}
-              style={{
-                borderColor:
-                  idx % 3 === 0
-                    ? 'rgba(78,172,216,0.22)'
-                    : idx % 3 === 1
-                    ? 'rgba(178,131,175,0.22)'
-                    : 'rgba(228,180,132,0.22)',
-              }}
-            >
-              {r.logo ? (
-                <Image
-                  src={r.logo}
-                  alt={r.name}
-                  width={160}
-                  height={64}
-                  className="h-10 w-auto object-contain transition group-hover:scale-105 opacity-90 group-hover:opacity-100"
-                />
-              ) : (
-                <span className="text-sm font-medium text-center">{r.name}</span>
-              )}
+          <BuyNow
+            label={`Quiero mis Dots — ${PRODUCT.priceLabel} →`}
+            className="rounded-full bg-[var(--dots-blue)] text-white px-10 py-5 text-lg font-extrabold hover:bg-white hover:text-[var(--dots-blue)] transition shadow-2xl shadow-[var(--dots-blue)]/30 inline-flex items-center justify-center gap-2 disabled:opacity-60"
+          />
+
+          <div className="flex flex-wrap justify-center gap-5 text-sm text-neutral-400">
+            <span className="inline-flex items-center gap-2"><ShieldCheck className="h-4 w-4 text-[var(--dots-blue)]" /> Pago 100% seguro</span>
+            <span className="inline-flex items-center gap-2"><Truck className="h-4 w-4 text-[var(--dots-blue)]" /> Envío discreto</span>
+            <span className="inline-flex items-center gap-2"><Clock className="h-4 w-4 text-[var(--dots-blue)]" /> 24–72 h en RD</span>
+          </div>
+
+          <p className="text-neutral-500 text-sm pt-2">
+            ¿Dudas antes de comprar?{' '}
+            <a href="https://wa.me/18498480190?text=Hola%20quiero%20info%20sobre%20Dots"
+              target="_blank" rel="noopener noreferrer"
+              className="text-white underline underline-offset-4 hover:text-[var(--dots-blue)] transition">
+              Escríbenos por WhatsApp →
             </a>
-          ))}
-        </div>
-        <p className="mt-2 text-xs text-center opacity-60">
-          Pide tu Dot en tu tienda fav ✨
-        </p>
-        <p className="mt-4 text-xs text-neutral-600">
-          ¿Eres tienda y quieres vender Dots? Escríbenos a{' '}
-          <a href="mailto:hola@dots.com.do" className="underline">
-            hola@dots.com.do
-          </a>.
-        </p>
-      </Section>
-
-      {/* TESTIMONIOS usando labels “antes/después” con color de etiqueta */}
-      <Section
-        id="testimonios"
-        eyebrow="Testimonios"
-        title="Lo que dicen quienes ya probaron Dots"
-        subtitle="Historias reales de personas que cambiaron cómo manejan sus espinillas."
-        className="bg-white/70 backdrop-blur rounded-3xl"
-      >
-        {/* Móvil: carrusel */}
-        <div className="md:hidden -mx-6 px-6 overflow-x-auto scroll-smooth snap-x snap-mandatory">
-          <div className="flex gap-4 w-max">
-            {testimonios.map((t, i) => {
-              const label =
-                beforeAfterLabels[i % beforeAfterLabels.length]?.caption || t.quote;
-              const badgeBg =
-                i % 3 === 0
-                  ? 'bg-[var(--dots-blue)]'
-                  : i % 3 === 1
-                  ? 'bg-[var(--dots-purple)]'
-                  : 'bg-[var(--dots-peach)]';
-              return (
-                <article
-                  key={t.name}
-                  className="snap-center w-72 shrink-0 rounded-2xl border bg-white p-4 shadow-sm"
-                  style={{ borderColor: 'rgba(12,12,12,0.08)' }}
-                >
-                  <div className="flex items-start justify-between">
-                    <div className="flex items-center gap-3">
-                      <div className="h-9 w-9 overflow-hidden rounded-full ring-1 ring-black/5">
-                        <Image
-                          src={t.avatar || '/testimonials/avatar-fallback.png'}
-                          alt={t.name}
-                          width={36}
-                          height={36}
-                          className="h-full w-full object-cover"
-                        />
-                      </div>
-                      <div>
-                        <div className="text-sm font-medium">{t.name}</div>
-                        <div className="text-xs text-neutral-500">{t.country}</div>
-                      </div>
-                    </div>
-                    <div className="text-xs text-neutral-500">ᐸᐳ Testimonio</div>
-                  </div>
-
-                  <p className="mt-3 text-sm text-neutral-800">{t.quote}</p>
-
-                  <div
-                    className="mt-3 relative aspect-[9/16] w-full overflow-hidden rounded-xl ring-2 bg-neutral-50"
-                    style={{
-                      borderColor: 'transparent',
-                      boxShadow: '0 0 0 1px rgba(12,12,12,0.06) inset',
-                    }}
-                  >
-                    <video
-                      className="absolute inset-0 h-full w-full object-cover"
-                      controls
-                      playsInline
-                      poster={t.poster || '/testimonials/poster.jpg'}
-                    >
-                      <source src={t.video} type="video/mp4" />
-                    </video>
-                    <span
-                      className={`absolute left-2 bottom-2 rounded-full ${badgeBg} text-white text-xs px-2 py-0.5`}
-                    >
-                      {label}
-                    </span>
-                  </div>
-                </article>
-              );
-            })}
-          </div>
-        </div>
-
-        {/* Desktop: grid */}
-        <div className="hidden md:grid md:grid-cols-3 gap-6">
-          {testimonios.map((t, i) => {
-            const label =
-              beforeAfterLabels[i % beforeAfterLabels.length]?.caption || t.quote;
-            const badgeBg =
-              i % 3 === 0
-                ? 'bg-[var(--dots-blue)]'
-                : i % 3 === 1
-                ? 'bg-[var(--dots-purple)]'
-                : 'bg-[var(--dots-peach)]';
-            return (
-              <article
-                key={t.name}
-                className="rounded-2xl border bg-white p-5 shadow-sm"
-                style={{ borderColor: 'rgba(12,12,12,0.08)' }}
-              >
-                <div className="flex items-start justify-between">
-                  <div className="flex items-center gap-3">
-                    <div className="h-10 w-10 overflow-hidden rounded-full ring-1 ring-black/5">
-                      <Image
-                        src={t.avatar || '/testimonials/avatar-fallback.png'}
-                        alt={t.name}
-                        width={40}
-                        height={40}
-                        className="h-full w-full object-cover"
-                      />
-                    </div>
-                    <div>
-                      <div className="text-sm font-semibold">{t.name}</div>
-                      <div className="text-xs text-neutral-500">{t.country}</div>
-                    </div>
-                  </div>
-                  <div className="text-xs text-neutral-500">〃 Testimonio</div>
-                </div>
-
-                <p className="mt-3 text-sm text-neutral-800">{t.quote}</p>
-
-                <div
-                  className="mt-4 relative aspect-[9/16] w-full overflow-hidden rounded-xl ring-2 bg-neutral-50"
-                  style={{
-                    borderColor: 'transparent',
-                    boxShadow: '0 0 0 1px rgba(12,12,12,0.06) inset',
-                  }}
-                >
-                  <video
-                    className="absolute inset-0 h-full w-full object-cover"
-                    controls
-                    playsInline
-                    poster={t.poster || '/testimonials/poster.jpg'}
-                  >
-                    <source src={t.video} type="video/mp4" />
-                  </video>
-                  <span
-                    className={`absolute left-2 bottom-2 rounded-full ${badgeBg} text-white text-xs px-2 py-0.5`}
-                  >
-                    {label}
-                  </span>
-                </div>
-              </article>
-            );
-          })}
-        </div>
-      </Section>
-
-      {/* FAQ */}
-      <Section
-        id="faq"
-        eyebrow="FAQ"
-        title="Preguntas frecuentes"
-        subtitle="Resolvemos las dudas más comunes antes de que compres."
-        className="rounded-3xl bg-white/80 backdrop-blur"
-      >
-        <div className="space-y-3">
-          {faqs.map((item) => (
-            <details
-              key={item.q}
-              className="group rounded-xl border bg-white px-4 py-3 text-sm transition"
-              style={{ borderColor: 'rgba(12,12,12,0.08)' }}
-            >
-              <summary className="flex cursor-pointer list-none items-center justify-between gap-3 text-[var(--dots-black)]">
-                <span>{item.q}</span>
-                <span className="text-xs text-neutral-500 group-open:hidden">+</span>
-                <span className="hidden text-xs text-neutral-500 group-open:inline">−</span>
-              </summary>
-              <p className="mt-2 text-neutral-700">{item.a}</p>
-            </details>
-          ))}
-        </div>
-      </Section>
-
-      {/* SOBRE DOTS */}
-      <Section
-        id="sobre-dots"
-        eyebrow="Sobre Dots"
-        title="Una marca pequeña, pero obsesionada con tu piel"
-        subtitle="Nacimos en el Caribe para acompañarte con productos simples, honestos y efectivos."
-        className="rounded-3xl"
-      >
-        <div className="grid gap-6 text-sm md:grid-cols-2">
-          <p className="text-neutral-700">
-            Dots surge de algo muy simple: el estrés de tener una espinilla justo el día menos
-            indicado. No prometemos piel perfecta de la noche a la mañana, pero sí darte una
-            herramienta que te ayude a manejar mejor esos brotes puntuales.
-          </p>
-          <p className="text-neutral-700">
-            Diseñamos el producto pensando en el clima, la humedad y la realidad de nuestra región.
-            Queremos que puedas usarlo sin vergüenza, con o sin maquillaje, y que sientas que tu
-            piel está un poquito más protegida cada vez que te pones un Dot.
           </p>
         </div>
-      </Section>
+      </section>
 
-      {/* ENVÍOS Y PAGOS + WHATSAPP */}
-      <Section
-        id="servicioalcliente"
-        eyebrow="Servicio al Cliente"
-        title="Dots cada vez más cerca de ti."
-        subtitle="Necesitas decirnos algo? Simple, solo escríbenos."
-        className="rounded-3xl bg-white/80 backdrop-blur"
-      >
-        <div className="mt-6 flex flex-col gap-3 rounded-2xl border border-[var(--dots-blue)]/25 bg-[var(--dots-blue)]/5 p-4 text-sm md:flex-row md:items-center md:justify-between">
+      {/* ── FOOTER ───────────────────────────────── */}
+      <footer className="bg-[var(--dots-dark)] text-neutral-500 text-xs py-8 px-5">
+        <div className="mx-auto max-w-6xl flex flex-col md:flex-row items-center justify-between gap-4">
           <div>
-            <p className="font-semibold text-[var(--dots-black)]">¿Tienes dudas antes de comprar?</p>
-            <p className="text-neutral-700 text-xs md:text-sm">
-              Escríbenos por WhatsApp y te ayudamos a decidir si Dots es para ti.
-            </p>
+            <p className="text-white font-bold text-sm mb-0.5">Dots</p>
+            <p>© {new Date().getFullYear()} Dots. Todos los derechos reservados. República Dominicana.</p>
           </div>
-          <a
-            href="https://wa.me/18498480190?text=Hola%20quiero%20informaci%C3%B3n%20sobre%20Dots"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-flex items-center justify-center rounded-full px-4 py-2 text-xs font-medium text-white shadow-sm md:text-sm"
-            style={{
-              background:
-                'linear-gradient(90deg, var(--dots-blue), var(--dots-purple))',
-            }}
-          >
-            Abrir WhatsApp
-          </a>
-        </div>
-      </Section>
-
-    
-      {/* FOOTER */}
-      <footer className="mt-8 border-t border-black/5 bg-white/70 text-xs text-neutral-600">
-        <div className="mx-auto flex max-w-5xl flex-col gap-4 px-4 py-6 md:flex-row md:items-center md:justify-between">
-          <div>
-            <p className="font-semibold text-[var(--dots-black)]">Dots</p>
-            <p className="text-[11px]">
-              © {new Date().getFullYear()} Dots. Todos los derechos reservados.
-            </p>
-          </div>
-          <div className="flex flex-wrap items-center gap-3">
-            <a href="#sobre-dots" className="hover:underline">
-              Sobre nosotros
-            </a>
-            <a href="/terminos" className="hover:underline">
-              Términos y condiciones
-            </a>
-            <a href="/privacidad" className="hover:underline">
-              Política de privacidad
-            </a>
-            <a href="mailto:hola@dots.com.do" className="hover:underline">
-              hola@dots.com.do
-            </a>
+          <div className="flex flex-wrap gap-5">
+            {[
+              ['Términos', '/terminos'],
+              ['Privacidad', '/privacidad'],
+              ['hola@dots.com.do', 'mailto:hola@dots.com.do'],
+              ['WhatsApp', 'https://wa.me/18498480190'],
+            ].map(([label, href]) => (
+              <a key={label} href={href}
+                target={href.startsWith('http') ? '_blank' : undefined}
+                rel={href.startsWith('http') ? 'noopener noreferrer' : undefined}
+                className="hover:text-white transition">
+                {label}
+              </a>
+            ))}
           </div>
         </div>
       </footer>
 
-      {/* BOTTOM BAR DE COLOR */}
-      <div className="h-1 w-full bg-gradient-to-r from-[var(--dots-blue)] via-[var(--dots-purple)] to-[var(--dots-peach)]" />
+      <StickyBuyBar price={PRODUCT.priceLabel} />
     </main>
   );
 }

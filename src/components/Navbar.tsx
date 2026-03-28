@@ -1,109 +1,99 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useTransition } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
+import { getCheckoutUrl } from '@/app/actions';
+import { ShoppingBag, X, Menu } from 'lucide-react';
 
-const items = [
+const links = [
   { href: '#beneficios', label: 'Beneficios' },
   { href: '#como-funciona', label: 'Cómo funciona' },
-  { href: '#ingredientes', label: 'Ingredientes' },
-  { href: '#antes-despues', label: 'Antes / Después' },
+  { href: '#testimonios', label: 'Testimonios' },
   { href: '#faq', label: 'FAQ' },
 ];
 
-const LOGO_MARK = '/primarylogo.png';
-
 export default function Navbar() {
   const [open, setOpen] = useState(false);
+  const [pending, start] = useTransition();
 
-  const scrollTo = (hash: string) => {
+  function scrollTo(hash: string) {
     setOpen(false);
-    const el = document.querySelector(hash);
-    if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
-  };
+    document.querySelector(hash)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+
+  function handleBuy() {
+    start(async () => {
+      const url = await getCheckoutUrl(1);
+      window.location.href = url;
+    });
+  }
 
   return (
-    <header className="sticky top-0 z-50 border-b bg-white/70 backdrop-blur supports-[backdrop-filter]:bg-white/60">
-      <nav className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-4 py-3">
-        {/* Logo Dots */}
-        <Link href="/" className="flex items-center gap-2" aria-label="Ir al inicio">
-          {/* Contenedor que define la altura real del header */}
-          <div className="h-8 md:h-10 overflow-hidden flex items-center">
-            <Image
-              src={LOGO_MARK}
-              alt="Dots"
-              width={220}
-              height={220}
-              // Imagen más grande de lo normal, el contenedor la recorta
-              className="h-12 md:h-14 w-auto"
-              priority
-            />
-          </div>
-        </Link>
+    <>
+      <header className="sticky top-0 z-50 bg-[var(--dots-cream)]/90 backdrop-blur-md border-b border-black/6">
+        <div className="mx-auto max-w-6xl px-5 h-16 flex items-center justify-between gap-6">
 
-        {/* Desktop */}
-        <ul className="hidden md:flex items-center gap-6 text-sm">
-          {items.map((i) => (
-            <li key={i.href}>
+          <Link href="/" aria-label="Inicio">
+            <Image src="/primarylogo.png" alt="Dots" width={90} height={32} className="h-8 w-auto" priority />
+          </Link>
+
+          <nav className="hidden md:flex items-center gap-7">
+            {links.map(l => (
               <button
-                onClick={() => scrollTo(i.href)}
-                className="opacity-80 hover:opacity-100"
+                key={l.href}
+                onClick={() => scrollTo(l.href)}
+                className="text-sm font-medium text-neutral-500 hover:text-[var(--dots-dark)] transition"
               >
-                {i.label}
+                {l.label}
               </button>
-            </li>
-          ))}
-          <li>
-            <button
-              onClick={() => scrollTo('#comprar')}
-              className="rounded-xl bg-[var(--dots-blue,_#4EACD8)] px-4 py-2 text-white hover:opacity-90"
-            >
-              Comprar
-            </button>
-          </li>
-        </ul>
-
-        {/* Mobile toggle */}
-        <button
-          className="md:hidden rounded-lg border px-3 py-2"
-          onClick={() => setOpen((v) => !v)}
-          aria-label="Abrir menú"
-          aria-expanded={open}
-          aria-controls="mobile-menu"
-        >
-          ☰
-        </button>
-      </nav>
-
-      {/* Mobile sheet */}
-      {open && (
-        <div
-          id="mobile-menu"
-          className="md:hidden border-t bg-white/90 backdrop-blur"
-        >
-          <ul className="mx-auto max-w-6xl px-4 py-3 space-y-3">
-            {items.map((i) => (
-              <li key={i.href}>
-                <button
-                  onClick={() => scrollTo(i.href)}
-                  className="w-full text-left py-2 opacity-80 hover:opacity-100"
-                >
-                  {i.label}
-                </button>
-              </li>
             ))}
-            <li>
+          </nav>
+
+          <div className="flex items-center gap-3">
+            <button
+              onClick={handleBuy}
+              disabled={pending}
+              className="hidden md:inline-flex items-center gap-2 rounded-full bg-[var(--dots-dark)] text-white px-5 py-2.5 text-sm font-semibold hover:bg-[var(--dots-blue)] transition disabled:opacity-60"
+            >
+              <ShoppingBag className="h-4 w-4" />
+              {pending ? 'Cargando…' : 'Comprar — RD$595'}
+            </button>
+
+            <button
+              className="md:hidden p-2 rounded-lg hover:bg-black/5 transition"
+              onClick={() => setOpen(v => !v)}
+              aria-label="Menú"
+            >
+              {open ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+            </button>
+          </div>
+        </div>
+      </header>
+
+      {/* Mobile menu */}
+      {open && (
+        <div className="md:hidden fixed inset-x-0 top-16 z-40 bg-[var(--dots-cream)] border-b border-black/6 shadow-lg">
+          <nav className="flex flex-col px-5 py-4 gap-1">
+            {links.map(l => (
               <button
-                onClick={() => scrollTo('#comprar')}
-                className="w-full rounded-xl bg-[var(--dots-blue,_#4EACD8)] px-4 py-2 text-white"
+                key={l.href}
+                onClick={() => scrollTo(l.href)}
+                className="text-left py-3 text-base font-medium text-[var(--dots-dark)] border-b border-black/5 last:border-0"
               >
-                Comprar
+                {l.label}
               </button>
-            </li>
-          </ul>
+            ))}
+            <button
+              onClick={handleBuy}
+              disabled={pending}
+              className="mt-3 w-full rounded-full bg-[var(--dots-dark)] text-white py-3.5 text-sm font-semibold disabled:opacity-60"
+            >
+              {pending ? 'Cargando…' : 'Comprar ahora — RD$595'}
+            </button>
+          </nav>
         </div>
       )}
-    </header>
+    </>
   );
 }

@@ -1,32 +1,32 @@
-// src/app/layout.tsx
 import type { Metadata } from 'next';
-import { Geist, Geist_Mono } from 'next/font/google';
+import { Plus_Jakarta_Sans } from 'next/font/google';
 import './globals.css';
-import Navbar from '@/components/Navbar'; // <- si tu carpeta es /src/components usa '@/src/components/Navbar'
+import Navbar from '@/components/Navbar';
+import FloatingWhatsApp from '@/components/FloatingWhatsApp';
 
-const geistSans = Geist({
-  variable: '--font-geist-sans',
+const jakarta = Plus_Jakarta_Sans({
   subsets: ['latin'],
-});
-
-const geistMono = Geist_Mono({
-  variable: '--font-geist-mono',
-  subsets: ['latin'],
+  variable: '--font-jakarta',
+  weight: ['400', '500', '600', '700', '800'],
 });
 
 export const metadata: Metadata = {
-  title: 'Dots — Parches de Espinillas',
-  description: 'Parche anti-espinillas con resultados visibles en horas.',
+  title: 'Dots — Parches Anti-espinillas · República Dominicana',
+  description: 'El parche hidrocoloide que aplanas tu espinilla en una noche. Sin explotar. Sin marcas. Sin drama.',
+  openGraph: {
+    title: 'Dots — Parches Anti-espinillas',
+    description: 'Aplana tu espinilla en una noche. Sin explotar. Sin marcas.',
+    images: [{ url: '/herodots.png' }],
+  },
 };
 
-export default function RootLayout({
-  children,
-}: Readonly<{ children: React.ReactNode }>) {
+export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="es" className="scroll-smooth">
-      <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
+      <body className={`${jakarta.variable} font-sans antialiased bg-[#FAFAF8]`}>
         <Navbar />
         {children}
+        <FloatingWhatsApp />
       </body>
     </html>
   );

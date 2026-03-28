@@ -1,30 +1,37 @@
 'use client';
 
 import { useTransition } from 'react';
-// @ts-expect-error server action import
-import { buyNowAction } from '@/src/app/actions';
+import { getCheckoutUrl } from '@/app/actions';
+import { Sparkles } from 'lucide-react';
 
-export default function BuyNow({ variantId, quantity = 1, label }: { variantId: string; quantity?: number; label?: string }) {
+interface BuyNowProps {
+  quantity?: number;
+  label?: string;
+  className?: string;
+}
+
+export default function BuyNow({ quantity = 1, label, className }: BuyNowProps) {
   const [pending, start] = useTransition();
 
+  function handleClick() {
+    start(async () => {
+      const url = await getCheckoutUrl(quantity);
+      window.location.href = url;
+    });
+  }
+
   return (
-    <form
-      action={(fd) => {
-        start(async () => {
-          fd.set('variantId', variantId);
-          fd.set('quantity', String(quantity));
-          const url = await buyNowAction(fd); // si usas variante con redirect del server, cambia por solo submit
-          window.location.href = url;
-        });
-      }}
+    <button
+      onClick={handleClick}
+      disabled={pending}
+      className={
+        className ??
+        'rounded-2xl px-6 py-3 bg-[var(--dots-blue)] text-white shadow hover:shadow-lg transition hover:-translate-y-0.5 inline-flex items-center gap-2 disabled:opacity-60'
+      }
+      type="button"
     >
-      <button
-        disabled={pending}
-        className="rounded-2xl px-6 py-3 bg-black text-white shadow hover:opacity-90 disabled:opacity-60"
-        type="submit"
-      >
-        {pending ? 'Procesando…' : (label ?? 'Comprar ahora')}
-      </button>
-    </form>
+      <Sparkles className="h-5 w-5" />
+      {pending ? 'Procesando…' : (label ?? 'Comprar ahora')}
+    </button>
   );
 }
